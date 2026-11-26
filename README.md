@@ -119,26 +119,40 @@ MANGOS comes with an extensive suite of fully implemented capabilities:
 
 ## Design System & UI
 
-MANGOS utilizes a bespoke, calm, nature-inspired visual design implemented entirely via semantic CSS variables and Tailwind utility classes.
+MANGOS utilizes a bespoke, calm, nature-inspired visual design implemented entirely via semantic CSS custom properties and Tailwind utility classes, eliminating legacy stylesheet overrides and high-specificity hacks.
 
 ### Color Tokens
 
+#### Surface & Typography Tokens
+
 | Token Name | Light Mode Value | Dark Mode Value | Usage |
 | :--- | :--- | :--- | :--- |
-| `--bg-primary` | `#F4F0E6` (Warm Beige) | `#0F1612` (Deep Forest) | Page background |
-| `--bg-secondary` | `#FAF8F2` (Light Cream) | `#151F19` (Forest Secondary) | Sub-sections, panels, headers |
-| `--bg-card` | `#FFFFFF` (White) | `#1A2620` (Card Forest) | Interactive cards, modal surfaces |
-| `--bg-muted` | `#E6DDC8` (Muted Beige) | `#22332A` (Muted Forest) | Inactive tabs, hover fills |
-| `--border-color` | `#DDDCCF` (Soft Sand) | `#2A3E34` (Deep Border) | Dividers, card boundaries |
-| `--text-main` | `#24332B` (Dark Spruce) | `#EEF4F0` (Off-white Frost) | Primary typography, headings |
-| `--text-muted` | `#68766C` (Sage Grey) | `#95A79C` (Muted Sage) | Captions, timestamps, metadata |
-| `--emerald-primary` | `#176B50` (Emerald Green) | `#29A078` (Vibrant Emerald) | Primary CTAs, active links, badges |
-| `--emerald-deep` | `#104C3A` (Deep Emerald) | `#1E7558` (Deep Forest Emerald) | Active button states, emphasis |
-| `--sage` | `#A8B5A0` (Sage Green) | `#5A7566` (Muted Sage) | Accent outlines, stat highlights |
-| `--sage-soft` | `#DCE6D8` (Soft Sage) | `#1E2D24` (Dark Sage Fill) | Subtle badge backgrounds, pills |
+| `--bg-primary` | `#F4F0E6` (Warm Beige) | `#0F1612` (Deep Forest) | Main page background |
+| `--bg-secondary` | `#FAF8F2` (Light Cream) | `#151F19` (Forest Secondary) | Sidebar, topbar header, secondary surfaces |
+| `--bg-card` | `#FFFFFF` (White) | `#1A2620` (Card Forest) | Elevated interactive cards, modal dialogs |
+| `--bg-muted` | `#E6DDC8` (Muted Beige) | `#24342B` (Muted Forest) | Inactive chips, subtle backgrounds |
+| `--border-color` | `#DDDCCF` (Border Beige) | `#2D3E34` (Forest Border) | Dividers, card boundaries, input outlines |
+| `--text-main` | `#24332B` (Dark Spruce) | `#EEF4F0` (Off-white Frost) | Primary typography, page and modal headings |
+| `--text-muted` | `#68766C` (Sage Grey) | `#A1B3A7` (Muted Sage) | Captions, metadata, secondary descriptions |
+| `--emerald-primary` | `#176B50` (Emerald Green) | `#29A078` (Vibrant Emerald) | Primary CTAs, active links, accents |
+| `--emerald-deep` | `#104C3A` (Deep Emerald) | `#1F7D5E` (Deep Forest Emerald) | Active button states, emphasis, active nav text |
+| `--sage` | `#A8B5A0` (Sage Green) | `#8EA38A` (Forest Sage) | Accent outlines, stat icon highlights |
+| `--sage-soft` | `#DCE6D8` (Soft Sage) | `#23352B` (Dark Sage Fill) | Active sidebar navigation pill, subtle badge fills |
+| `--sage-dark` | `#5F7563` (Dark Sage) | `#B0C4AC` (Elevated Sage) | Subheadings, section labels, secondary accents |
 
-### Layout Mechanics
-- **Full-Viewport Height Flex Column**: The dashboard uses a split layout where the sidebar and main viewport independently manage scroll behavior.
+#### Nature-Harmonized Semantic Status Tokens
+
+| Semantic Token | Light Mode Value | Dark Mode Value | Purpose |
+| :--- | :--- | :--- | :--- |
+| `--status-success` | `#176B50` / BG: `#DCE6D8` | `#29A078` / BG: `#1E2D24` | Solved questions, cloud synced indicators, successes |
+| `--status-warning` | `#8C6D23` / BG: `#F7EEDB` | `#D4B06A` / BG: `#282319` | Under-review notices, needs audit, sync retry alerts |
+| `--status-danger` | `#8C3B32` / BG: `#F7E2DF` | `#D4706A` / BG: `#2E1B1B` | Broken URL warnings, error alerts, sign-out actions |
+| `--status-info` | `#5F7563` / BG: `#E6DDC8` | `#B0C4AC` / BG: `#24342B` | System disclosures, contextual guidance |
+
+### Layout & Surface Mechanics
+- **Unified Secondary Frame**: Both the Sidebar and Topbar share the Light Cream (`#FAF8F2` / `#151F19`) secondary surface, providing a natural frame around the primary Warm Beige (`#F4F0E6` / `#0F1612`) workspace canvas.
+- **Calm Active Navigation**: Active sidebar links utilize a Soft Sage pill background (`var(--sage-soft)`) with Deep Emerald typography (`var(--emerald-deep)`), replacing heavy solid blocks with an understated, readable active state.
+- **Full-Viewport Height Flex Column**: The dashboard uses a split layout where the sidebar and main viewport independently manage scroll behavior with custom-styled, low-profile scrollbars (`sidebar-scrollbar`).
 - **Fixed Branding & Anchored Profile**: Sidebar branding is pinned to the top, navigation items scroll without clipping, and user account actions remain anchored at the bottom.
 - **Mobile Responsive Drawer**: Collapsible off-canvas mobile menu with backdrop blur on smaller viewport sizes (`<1024px`).
 
