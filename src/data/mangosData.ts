@@ -30,8 +30,8 @@ export const companiesData: CompanyDetail[] = [
   {
     name: 'Meta',
     mark: '∞',
-    accent: '#176B50',
-    tint: '#DCE6D8',
+    accent: 'var(--emerald-primary)',
+    tint: 'var(--sage-soft)',
     focus: 'Product engineering & AI',
     overview: 'Build products that connect billions of people and move quickly from idea to impact.',
     rounds: ['Coding fundamentals', 'Product sense', 'Systems design', 'Behavioral'],
@@ -40,8 +40,8 @@ export const companiesData: CompanyDetail[] = [
   {
     name: 'Anthropic',
     mark: 'A',
-    accent: '#5F7563',
-    tint: '#E6DDC8',
+    accent: 'var(--sage-dark)',
+    tint: 'var(--bg-muted)',
     focus: 'Safety research & system reliability',
     overview: 'Work on foundational alignment, frontier models, and steerable LLM evaluation suites.',
     rounds: ['Research code review', 'Engineering interview', 'Alignment deep dive', 'Values alignment'],
@@ -50,8 +50,8 @@ export const companiesData: CompanyDetail[] = [
   {
     name: 'NVIDIA',
     mark: 'N',
-    accent: '#104C3A',
-    tint: '#DCE6D8',
+    accent: 'var(--emerald-deep)',
+    tint: 'var(--sage-soft)',
     focus: 'Accelerated computing & full stack',
     overview: 'Power the modern computing stack from silicon design to enterprise AI infra.',
     rounds: ['C++ & CUDA', 'Parallel systems', 'Architecture design', 'Manager round'],
@@ -60,8 +60,8 @@ export const companiesData: CompanyDetail[] = [
   {
     name: 'Google',
     mark: 'G',
-    accent: '#176B50',
-    tint: '#FAF8F2',
+    accent: 'var(--emerald-primary)',
+    tint: 'var(--bg-secondary)',
     focus: 'Scale, infrastructure & platforms',
     overview: 'Design platforms handling billions of queries per day with unmatched latency standards.',
     rounds: ['Algorithmic interview (x2)', 'System architecture', 'Googleiness & Leadership'],
@@ -70,8 +70,8 @@ export const companiesData: CompanyDetail[] = [
   {
     name: 'OpenAI',
     mark: 'O',
-    accent: '#5F7563',
-    tint: '#FAF8F2',
+    accent: 'var(--sage-dark)',
+    tint: 'var(--bg-secondary)',
     focus: 'Applied AI & infrastructure',
     overview: 'Scale frontier training runs and build fast APIs serving millions of developers.',
     rounds: ['Practical coding challenge', 'Infra architecture', 'Research translation', 'Cultural add'],
@@ -80,8 +80,8 @@ export const companiesData: CompanyDetail[] = [
   {
     name: 'SpaceX',
     mark: 'S',
-    accent: '#24332B',
-    tint: '#E6DDC8',
+    accent: 'var(--text-main)',
+    tint: 'var(--bg-muted)',
     focus: 'Embedded software & avionics',
     overview: 'Write fault-tolerant avionics flight code and real-time mission telemetry engines.',
     rounds: ['Hardware-in-the-loop coding', 'Concurrency & RTOS', 'Systems integration'],
@@ -93,19 +93,16 @@ export const milestoneGroups = [
   {
     title: 'Software Engineering',
     icon: Code2,
-    color: '#176B50',
     milestones: ['Programming fundamentals', 'Data structures & algorithms', 'System design essentials', 'Behavioral storytelling'],
   },
   {
     title: 'Data Science',
     icon: BarChart3,
-    color: '#5F7563',
     milestones: ['Statistics & experimentation', 'SQL and data modeling', 'ML foundations', 'Case study practice'],
   },
   {
     title: 'AI / ML Engineering',
     icon: BrainCircuit,
-    color: '#104C3A',
     milestones: ['Math & linear algebra', 'PyTorch & Transformer architectures', 'Distributed training', 'Model alignment & evaluations'],
   },
 ];

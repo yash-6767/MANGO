@@ -4,19 +4,33 @@
 @tailwind utilities;
 
 :root {
-  /* Nature-Inspired Light Palette */
-  --bg-primary: #F4F0E6; /* Warm Beige */
-  --bg-secondary: #FAF8F2; /* Light Cream */
-  --bg-card: #FFFFFF; /* Pure Card White */
-  --bg-muted: #E6DDC8; /* Muted Beige */
-  --sage: #A8B5A0; /* Sage Green */
-  --sage-soft: #DCE6D8; /* Soft Sage */
-  --sage-dark: #5F7563; /* Dark Sage */
-  --emerald-primary: #176B50; /* Primary Emerald */
-  --emerald-deep: #104C3A; /* Deep Emerald */
-  --text-main: #24332B; /* Main Text */
-  --text-muted: #68766C; /* Secondary Text */
-  --border-color: #DDDCCF; /* Neutral Beige Border */
+  /* Official MANGOS Light Palette */
+  --bg-primary: #F4F0E6;       /* Warm Beige - Main page background */
+  --bg-secondary: #FAF8F2;     /* Light Cream - Secondary background */
+  --bg-card: #FFFFFF;          /* Card White - Cards and elevated surfaces */
+  --bg-muted: #E6DDC8;         /* Muted Beige - Subtle backgrounds */
+  --sage: #A8B5A0;             /* Sage - Decorative accents */
+  --sage-soft: #DCE6D8;        /* Soft Sage - Highlight backgrounds */
+  --sage-dark: #5F7563;        /* Dark Sage - Secondary accents */
+  --emerald-primary: #176B50;  /* Primary Emerald - Primary buttons, links & emphasis */
+  --emerald-deep: #104C3A;     /* Deep Emerald - Hover states and strong emphasis */
+  --text-main: #24332B;        /* Main Text - Primary typography */
+  --text-muted: #68766C;       /* Secondary Text - Muted text */
+  --border-color: #DDDCCF;     /* Border Beige - Borders and dividers */
+
+  /* Semantic Status Colors (Nature-Harmonized) */
+  --status-success: #176B50;
+  --status-success-bg: #DCE6D8;
+  --status-success-border: #A8B5A0;
+  --status-warning: #8C6D23;
+  --status-warning-bg: #F7EEDB;
+  --status-warning-border: #E8D5B5;
+  --status-danger: #8C3B32;
+  --status-danger-bg: #F7E2DF;
+  --status-danger-border: #E8C1BD;
+  --status-info: #5F7563;
+  --status-info-bg: #E6DDC8;
+  --status-info-border: #DDDCCF;
 
   font-family: 'DM Sans', sans-serif;
   color: var(--text-main);
@@ -26,19 +40,33 @@
 }
 
 [data-theme="dark"] {
-  /* Nature-Inspired Dark Forest Palette */
-  --bg-primary: #0F1612; /* Deep Earth Black */
-  --bg-secondary: #151F19; /* Forest Charcoal */
-  --bg-card: #1A2620; /* Card Forest Green */
-  --bg-muted: #24342B; /* Muted Green Charcoal */
-  --sage: #8EA38A; /* Sage Highlight */
-  --sage-soft: #23352B; /* Soft Sage Dark */
-  --sage-dark: #B0C4AC; /* Elevated Sage Text */
-  --emerald-primary: #29A078; /* Vibrant Emerald Button/Link */
-  --emerald-deep: #1F7D5E; /* Deep Hover Emerald */
-  --text-main: #EEF4F0; /* Bright Clean Text */
-  --text-muted: #A1B3A7; /* Secondary Text */
-  --border-color: #2D3E34; /* Subtle Forest Border */
+  /* Official MANGOS Dark Forest Palette */
+  --bg-primary: #0F1612;       /* Main Background */
+  --bg-secondary: #151F19;     /* Secondary Background */
+  --bg-card: #1A2620;          /* Card Background */
+  --bg-muted: #24342B;         /* Muted Background */
+  --sage: #8EA38A;             /* Sage Accent */
+  --sage-soft: #23352B;        /* Soft Sage */
+  --sage-dark: #B0C4AC;        /* Elevated Sage Text */
+  --emerald-primary: #29A078;  /* Primary Emerald */
+  --emerald-deep: #1F7D5E;     /* Deep Emerald */
+  --text-main: #EEF4F0;        /* Main Text */
+  --text-muted: #A1B3A7;       /* Secondary Text */
+  --border-color: #2D3E34;     /* Subtle Forest Borders */
+
+  /* Semantic Status Colors (Dark Forest) */
+  --status-success: #29A078;
+  --status-success-bg: #1E2D24;
+  --status-success-border: #2D4D3A;
+  --status-warning: #D4B06A;
+  --status-warning-bg: #282319;
+  --status-warning-border: #443924;
+  --status-danger: #D4706A;
+  --status-danger-bg: #2E1B1B;
+  --status-danger-border: #4D2929;
+  --status-info: #B0C4AC;
+  --status-info-bg: #24342B;
+  --status-info-border: #2D3E34;
 }
 
 * {
@@ -181,115 +209,4 @@ button {
 
 .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--sage);
-}
-
-/* Dynamic CSS variable mapping for common classes */
-.bg-\[\#0b0d10\] { background-color: var(--bg-primary) !important; }
-.bg-\[\#101216\] { background-color: var(--bg-card) !important; }
-.bg-\[\#15181d\] { background-color: var(--bg-card) !important; }
-.bg-\[\#161a20\] { background-color: var(--bg-card) !important; }
-.bg-\[\#17191d\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#1a1d22\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#181b20\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#1b1e24\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#191c21\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#171a1f\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#1b1d25\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#1d1e25\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#211b18\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#242019\] { background-color: var(--sage-soft) !important; }
-.bg-\[\#25202a\] { background-color: var(--bg-secondary) !important; }
-.bg-\[\#2b3037\], .bg-\[\#2b3038\], .bg-\[\#2a2f36\], .bg-\[\#313640\] { background-color: var(--border-color) !important; }
-.bg-\[\#232831\] { background-color: var(--bg-secondary) !important; }
-
-/* Primary CTA & Accent mappings */
-.bg-\[\#ff8b5b\], .bg-\[\#ff9a63\], .bg-\[\#ff9564\], .bg-\[\#ff9b68\] {
-  background-color: var(--emerald-primary) !important;
-  color: #FFFFFF !important;
-}
-
-.hover\:bg-\[\#ff9f78\]:hover, .hover\:bg-\[\#ff9b72\]:hover {
-  background-color: var(--emerald-deep) !important;
-}
-
-.text-\[\#ff8b5b\], .text-\[\#ff9a63\], .text-\[\#ff9564\], .text-\[\#ff9b68\], .text-\[\#ffad7b\] {
-  color: var(--emerald-primary) !important;
-}
-
-/* Secondary accent mappings */
-.bg-\[\#ff8b5b\]\/10, .bg-\[\#ff8b5b\]\/12, .bg-\[\#ff8b5b\]\/15, .bg-\[\#ff9a63\]\/10, .bg-\[\#ff9a63\]\/15 {
-  background-color: var(--sage-soft) !important;
-  color: var(--emerald-primary) !important;
-}
-
-.border-\[\#ff8b5b\], .border-\[\#ff9a63\]\/20, .border-\[\#ff8b5b\]\/40 {
-  border-color: var(--sage) !important;
-}
-
-/* Text mappings */
-.text-white {
-  color: var(--text-main) !important;
-}
-
-.text-\[\#eef1f4\], .text-\[\#e3e6e9\], .text-\[\#dfe3e7\], .text-\[\#d7dce1\], .text-\[\#d4dae0\], .text-\[\#d1d7de\], .text-\[\#cbd1d7\], .text-\[\#c8ced5\], .text-\[\#c6cdd4\], .text-\[\#c4cbd3\], .text-\[\#c1c8d0\], .text-\[\#c0c7cf\], .text-\[\#c0c8d0\] {
-  color: var(--text-main) !important;
-}
-
-.text-\[\#a7aeb8\], .text-\[\#a0a8b2\], .text-\[\#9ba3ad\], .text-\[\#9aa1aa\], .text-\[\#929ca7\], .text-\[\#8e97a3\], .text-\[\#8d96a1\], .text-\[\#8d94a0\], .text-\[\#8b949f\], .text-\[\#89929d\], .text-\[\#89929c\], .text-\[\#7f8994\], .text-\[\#7f8792\], .text-\[\#7d8691\], .text-\[\#78818d\], .text-\[\#77818c\], .text-\[\#77808c\], .text-\[\#747e89\], .text-\[\#737d89\], .text-\[\#737c88\], .text-\[\#727c88\], .text-\[\#727b86\], .text-\[\#6f7884\], .text-\[\#6e7783\], .text-\[\#68766c\], .text-\[\#67717d\], .text-\[\#66707d\], .text-\[\#66707b\], .text-\[\#656d77\], .text-\[\#606875\], .text-\[\#5e6873\], .text-\[\#59636f\], .text-\[\#58606b\] {
-  color: var(--text-muted) !important;
-}
-
-/* Border mappings */
-.border-\[\#20242b\], .border-\[\#252a32\], .border-\[\#292b2c\], .border-\[\#292e35\], .border-\[\#292e36\], .border-\[\#292f37\], .border-\[\#2a2e35\], .border-\[\#2a3038\], .border-\[\#2b3038\], .border-\[\#2c3039\], .border-\[\#2d3038\], .border-\[\#2d333b\], .border-\[\#303640\], .border-\[\#31333c\], .border-\[\#323842\], .border-\[\#343a44\], .border-\[\#343b45\], .border-\[\#3a404a\], .border-\[\#3b3541\], .border-\[\#4a515d\], .border-\[\#47505c\], .border-\[\#454c57\] {
-  border-color: var(--border-color) !important;
-}
-
-.divide-\[\#252a32\] > :not([hidden]) ~ :not([hidden]) {
-  border-color: var(--border-color) !important;
-}
-
-/* Topbar header styling */
-header {
-  background-color: var(--bg-primary) !important;
-  border-color: var(--border-color) !important;
-}
-
-/* Hover styling */
-.hover\:border-\[\#3c444e\]:hover, .hover\:border-\[\#414954\]:hover, .hover\:border-\[\#454c57\]:hover, .hover\:border-\[\#4a535f\]:hover {
-  border-color: var(--sage) !important;
-}
-
-/* Hero dashboard gradient */
-.bg-\[radial-gradient\(circle_at_80\%_0\%\,\#372b1e_0\%\,\#17191d_45\%\,\#15171b_100\%\)\] {
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 50%, var(--bg-muted) 100%) !important;
-  border-color: var(--border-color) !important;
-}
-
-/* Green status indicators */
-.text-\[\#72c76b\], .text-\[\#95c89a\] {
-  color: var(--emerald-primary) !important;
-}
-.bg-\[\#72c76b\] {
-  background-color: var(--emerald-primary) !important;
-  color: #FFFFFF !important;
-}
-.bg-\[\#72c76b\]\/10, .bg-\[\#72c76b\]\/25, .bg-\[\#17231b\] {
-  background-color: var(--sage-soft) !important;
-  color: var(--emerald-primary) !important;
-}
-.border-\[\#72c76b\], .border-\[\#72c76b\]\/25, .border-\[\#72c76b\]\/30 {
-  border-color: var(--sage) !important;
-}
-
-/* Amber/warm indicators */
-.text-\[\#d5a565\], .text-\[\#ffca69\] {
-  color: var(--sage-dark) !important;
-}
-.bg-\[\#d5a565\]\/10, .bg-\[\#d5a565\]\/30 {
-  background-color: var(--bg-muted) !important;
-  color: var(--text-main) !important;
-}
-.bg-\[\#ffca69\] {
-  background-color: var(--emerald-primary) !important;
-  color: #FFFFFF !important;
 }

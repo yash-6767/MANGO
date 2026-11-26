@@ -17,25 +17,21 @@ const milestoneGroups = [
   {
     title: 'Software Engineering',
     icon: Code2,
-    color: '#176B50',
     milestones: ['Programming fundamentals', 'Data structures & algorithms', 'System design essentials', 'Behavioral storytelling'],
   },
   {
     title: 'Data Science',
     icon: BarChart3,
-    color: '#5F7563',
     milestones: ['Statistics & experimentation', 'SQL and data modeling', 'ML foundations', 'Case study practice'],
   },
   {
     title: 'AI / ML Engineering',
     icon: BrainCircuit,
-    color: '#176B50',
     milestones: ['Python & linear algebra', 'Model training loops', 'Evaluation & safety', 'Production inference'],
   },
   {
     title: 'Backend Development',
     icon: LayersIcon,
-    color: '#5F7563',
     milestones: ['API design', 'Databases & caching', 'Distributed systems', 'Reliability & observability'],
   },
 ];

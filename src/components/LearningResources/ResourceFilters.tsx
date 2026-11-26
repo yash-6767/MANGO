@@ -153,7 +153,7 @@ export const ResourceFilters: React.FC<ResourceFiltersProps> = ({
           {hasActiveFilters && (
             <button
               onClick={onResetFilters}
-              className="flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/40 px-3 py-2.5 text-xs font-bold text-rose-700 dark:text-rose-300 transition hover:bg-rose-100"
+              className="flex items-center gap-1 rounded-xl border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-3 py-2.5 text-xs font-bold text-[var(--status-danger)] transition hover:opacity-90"
             >
               <X className="h-3.5 w-3.5" />
               Reset

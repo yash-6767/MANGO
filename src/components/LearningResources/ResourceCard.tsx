@@ -44,19 +44,19 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
         return null;
       case 'Under Review':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--status-warning-bg)] px-2 py-0.5 text-[10px] font-bold text-[var(--status-warning)] border border-[var(--status-warning-border)]">
             <Clock className="h-3 w-3" /> Under Review
           </span>
         );
       case 'Broken':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--status-danger-bg)] px-2 py-0.5 text-[10px] font-bold text-[var(--status-danger)] border border-[var(--status-danger-border)]">
             <AlertTriangle className="h-3 w-3" /> Broken URL
           </span>
         );
       case 'Archived':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-stone-100 dark:bg-stone-900 px-2 py-0.5 text-[10px] font-bold text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-800">
+          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-muted)] px-2 py-0.5 text-[10px] font-bold text-[var(--text-muted)] border border-[var(--border-color)]">
             <Archive className="h-3 w-3" /> Archived
           </span>
         );
@@ -90,7 +90,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             {requiresAudit && resource.status === 'Active' && (
               <span
                 title="Last verified more than 90 days ago"
-                className="inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300 border border-amber-200"
+                className="inline-flex items-center gap-1 rounded-md bg-[var(--status-warning-bg)] px-2 py-0.5 text-[10px] font-bold text-[var(--status-warning)] border border-[var(--status-warning-border)]"
               >
                 <AlertCircle className="h-3 w-3" /> Needs Audit
               </span>

@@ -148,14 +148,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Alert Messages */}
         {errorMsg && (
-          <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-800 dark:text-rose-200 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <div className="mb-4 rounded-xl border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-3 text-xs text-[var(--status-danger)] flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 text-[var(--status-danger)]" />
             <span>{errorMsg}</span>
           </div>
         )}
         {successMsg && (
-          <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/40 p-3 text-xs text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+          <div className="mb-4 rounded-xl border border-[var(--status-success-border)] bg-[var(--status-success-bg)] p-3 text-xs text-[var(--status-success)] flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--status-success)]" />
             <span>{successMsg}</span>
           </div>
         )}

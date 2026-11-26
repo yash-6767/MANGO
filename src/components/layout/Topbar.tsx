@@ -92,9 +92,9 @@ export const Topbar: React.FC<TopbarProps> = ({
           <button
             onClick={onRetrySync}
             title="Cloud sync encountered an issue. Click to retry."
-            className="flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 shadow-sm transition hover:opacity-90"
+            className="flex items-center gap-1.5 rounded-full border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] px-2.5 py-1 text-[11px] font-bold text-[var(--status-warning)] shadow-sm transition hover:opacity-90"
           >
-            <AlertCircle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+            <AlertCircle className="h-3.5 w-3.5 text-[var(--status-warning)]" />
             <span>Sync Pending (Retry)</span>
           </button>
         )}

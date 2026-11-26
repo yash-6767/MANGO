@@ -179,8 +179,8 @@ export const ResourceImportModal: React.FC<ResourceImportModalProps> = ({
           {previewData && (
             <div className="space-y-4">
               {!previewData.success ? (
-                <div className="rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/40 p-4 text-xs text-rose-800 dark:text-rose-200 flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
+                <div className="rounded-xl border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-4 text-xs text-[var(--status-danger)] flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-[var(--status-danger)] mt-0.5" />
                   <div>
                     <p className="font-bold">JSON Syntax Error</p>
                     <p className="mt-1">{previewData.error}</p>
@@ -199,7 +199,7 @@ export const ResourceImportModal: React.FC<ResourceImportModalProps> = ({
                     </div>
 
                     <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-3 text-center">
-                      <div className="flex items-center justify-center gap-1 text-amber-700 dark:text-amber-400 font-bold">
+                      <div className="flex items-center justify-center gap-1 text-[var(--status-warning)] font-bold">
                         <AlertTriangle className="h-4 w-4" />
                         <span className="text-xl font-extrabold">{previewData.preview?.duplicateCount}</span>
                       </div>
@@ -207,7 +207,7 @@ export const ResourceImportModal: React.FC<ResourceImportModalProps> = ({
                     </div>
 
                     <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-3 text-center">
-                      <div className="flex items-center justify-center gap-1 text-rose-700 dark:text-rose-400 font-bold">
+                      <div className="flex items-center justify-center gap-1 text-[var(--status-danger)] font-bold">
                         <AlertCircle className="h-4 w-4" />
                         <span className="text-xl font-extrabold">{previewData.preview?.errorCount}</span>
                       </div>
@@ -217,9 +217,9 @@ export const ResourceImportModal: React.FC<ResourceImportModalProps> = ({
 
                   {/* Errors Detail if any */}
                   {previewData.preview?.errors && previewData.preview.errors.length > 0 && (
-                    <div className="rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-800 dark:text-rose-200">
+                    <div className="rounded-xl border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-3 text-xs text-[var(--status-danger)]">
                       <p className="font-bold mb-1.5 flex items-center gap-1.5">
-                        <AlertCircle className="h-3.5 w-3.5 text-rose-600" />
+                        <AlertCircle className="h-3.5 w-3.5 text-[var(--status-danger)]" />
                         Rejected Entries (will NOT be imported):
                       </p>
                       <ul className="list-disc list-inside space-y-1">
@@ -234,9 +234,9 @@ export const ResourceImportModal: React.FC<ResourceImportModalProps> = ({
 
                   {/* Duplicates Detail if any */}
                   {previewData.preview?.duplicates && previewData.preview.duplicates.length > 0 && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-900 dark:text-amber-200">
+                    <div className="rounded-xl border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] p-3 text-xs text-[var(--status-warning)]">
                       <p className="font-bold mb-1.5 flex items-center gap-1.5">
-                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+                        <AlertTriangle className="h-3.5 w-3.5 text-[var(--status-warning)]" />
                         Detected Duplicates (already in database or batch):
                       </p>
                       <ul className="list-disc list-inside space-y-1">
