@@ -92,7 +92,7 @@ export const Profile: React.FC<ProfileProps> = ({
               {currentUser ? (
                 <button
                   onClick={onSignOut}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-2.5 text-xs font-bold text-[var(--text-main)] hover:bg-rose-50 hover:text-rose-700 transition"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-2.5 text-xs font-bold text-[var(--text-main)] hover:border-[var(--status-danger-border)] hover:bg-[var(--status-danger-bg)] hover:text-[var(--status-danger)] transition"
                 >
                   <LogOut className="h-3.5 w-3.5" /> Sign Out
                 </button>

@@ -89,7 +89,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-[260px] flex-col border-r border-[var(--border-color)] bg-[var(--bg-card)] transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-[260px] flex-col border-r border-[var(--border-color)] bg-[var(--bg-secondary)] transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
@@ -137,16 +137,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => navigate(label)}
                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-all ${
                       isActive
-                        ? 'bg-[var(--emerald-primary)] text-white shadow-sm font-bold'
-                        : 'text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-main)]'
+                        ? 'bg-[var(--sage-soft)] text-[var(--emerald-deep)] dark:text-[var(--emerald-primary)] font-bold shadow-sm'
+                        : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)]'
                     }`}
                   >
-                    <Icon className={`h-[18px] w-[18px] shrink-0 ${isActive ? 'text-white' : 'text-[var(--sage-dark)]'}`} />
+                    <Icon className={`h-[18px] w-[18px] shrink-0 ${isActive ? 'text-[var(--emerald-deep)] dark:text-[var(--emerald-primary)]' : 'text-[var(--sage-dark)]'}`} />
                     <span className="truncate">{label}</span>
                     {badge && (
                       <span
                         className={`ml-auto rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shrink-0 ${
-                          isActive ? 'bg-white/20 text-white' : badgeColor || 'bg-[var(--sage-soft)] text-[var(--emerald-primary)]'
+                          isActive
+                            ? 'bg-[var(--emerald-primary)]/15 text-[var(--emerald-deep)] dark:text-[var(--emerald-primary)]'
+                            : badgeColor || 'bg-[var(--sage-soft)] text-[var(--emerald-primary)]'
                         }`}
                       >
                         {badge}
@@ -168,16 +170,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => navigate('Bookmarks')}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-all ${
                   page === 'Bookmarks'
-                    ? 'bg-[var(--emerald-primary)] text-white shadow-sm font-bold'
-                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-main)]'
+                    ? 'bg-[var(--sage-soft)] text-[var(--emerald-deep)] dark:text-[var(--emerald-primary)] font-bold shadow-sm'
+                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)]'
                 }`}
               >
-                <Bookmark className={`h-[18px] w-[18px] shrink-0 ${page === 'Bookmarks' ? 'text-white' : 'text-[var(--sage-dark)]'}`} />
+                <Bookmark className={`h-[18px] w-[18px] shrink-0 ${page === 'Bookmarks' ? 'text-[var(--emerald-deep)] dark:text-[var(--emerald-primary)]' : 'text-[var(--sage-dark)]'}`} />
                 <span>Bookmarks</span>
                 {totalBookmarks > 0 && (
                   <span
                     className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      page === 'Bookmarks' ? 'bg-white/20 text-white' : 'bg-[var(--sage-soft)] text-[var(--emerald-primary)]'
+                      page === 'Bookmarks'
+                        ? 'bg-[var(--emerald-primary)]/15 text-[var(--emerald-deep)] dark:text-[var(--emerald-primary)]'
+                        : 'bg-[var(--sage-soft)] text-[var(--emerald-primary)]'
                     }`}
                   >
                     {totalBookmarks}
@@ -189,18 +193,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => navigate('Profile')}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-all ${
                   page === 'Profile'
-                    ? 'bg-[var(--emerald-primary)] text-white shadow-sm font-bold'
-                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-main)]'
+                    ? 'bg-[var(--sage-soft)] text-[var(--emerald-deep)] dark:text-[var(--emerald-primary)] font-bold shadow-sm'
+                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)]'
                 }`}
               >
-                <Settings2 className={`h-[18px] w-[18px] shrink-0 ${page === 'Profile' ? 'text-white' : 'text-[var(--sage-dark)]'}`} />
+                <Settings2 className={`h-[18px] w-[18px] shrink-0 ${page === 'Profile' ? 'text-[var(--emerald-deep)] dark:text-[var(--emerald-primary)]' : 'text-[var(--sage-dark)]'}`} />
                 <span>Profile & Settings</span>
               </button>
             </nav>
           </div>
 
           {/* Monthly Library Update Reminder Card */}
-          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-3.5 text-xs text-[var(--sage-dark)]">
+          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5 text-xs text-[var(--sage-dark)]">
             <div className="flex items-center gap-1.5 font-bold text-[var(--emerald-primary)]">
               <Sparkles className="h-3.5 w-3.5 text-[var(--emerald-primary)]" />
               Monthly Library Update

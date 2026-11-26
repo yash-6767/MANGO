@@ -45,7 +45,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   const initials = getInitials();
 
   return (
-    <header className="sticky top-0 z-20 flex h-[70px] shrink-0 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-primary)]/95 px-4 backdrop-blur-xl sm:px-8 lg:px-10 text-[var(--text-main)]">
+    <header className="sticky top-0 z-20 flex h-[70px] shrink-0 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-secondary)]/95 px-4 backdrop-blur-xl sm:px-8 lg:px-10 text-[var(--text-main)]">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenu}
