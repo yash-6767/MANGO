@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #eef1f4;
+  background: #0b0d10;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; background: #0b0d10; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+.font-display, h1, h2, h3 { font-family: 'Plus Jakarta Sans', sans-serif; }
+.field { width: 100%; border: 1px solid #303640; border-radius: .75rem; background: #1a1d22; padding: .7rem .85rem; font-size: .875rem; font-weight: 600; color: #e7ebef; outline: none; }
+.field:focus { border-color: #ff8b5b; }
+.field option { background: #171a1f; color: #eef1f4; }
+.tag { display: inline-flex; border-radius: .5rem; background: #2b2a24; padding: .5rem .6rem; font-size: .7rem; font-weight: 700; color: #d5a565; }
+.mango-mark { position: relative; display: flex; height: 29px; width: 29px; transform: rotate(-10deg); align-items: center; justify-content: center; border-radius: 50% 50% 50% 12%; background: #ff9d56; box-shadow: inset -3px -3px 0 rgba(160, 60, 25, .2); }
+.mango-mark::after { content: ''; position: absolute; right: -3px; top: -6px; height: 10px; width: 5px; transform: rotate(35deg); border-radius: 99px; background: #6aa56c; }
+.mango-mark span { height: 17px; width: 4px; transform: rotate(35deg); border-radius: 99px; background: rgba(255, 242, 176, .65); }
+::selection { background: #ff8b5b; color: #17120f; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0b0d10; }
+::-webkit-scrollbar-thumb { border-radius: 99px; background: #303640; }
+::-webkit-scrollbar-thumb:hover { background: #454e5a; }
+
+[data-theme="light"] { background: #f4f6f8 !important; color: #17202b !important; }
+[data-theme="light"] [class*="bg-[#0b0d10]"],
+[data-theme="light"] [class*="bg-[#101216]"],
+[data-theme="light"] [class*="bg-[#15181d]"],
+[data-theme="light"] [class*="bg-[#161a20]"],
+[data-theme="light"] [class*="bg-[#17191d]"],
+[data-theme="light"] [class*="bg-[#1a1d22]"],
+[data-theme="light"] [class*="bg-[#181b20]"],
+[data-theme="light"] [class*="bg-[#1b1e24]"],
+[data-theme="light"] [class*="bg-[#1a1d22]"],
+[data-theme="light"] [class*="bg-[#191c21]"] { background-color: #ffffff !important; }
+[data-theme="light"] [class*="bg-[#0b0d10]"] { background-color: #f4f6f8 !important; }
+[data-theme="light"] [class*="bg-[#101216]"] { background-color: #ffffff !important; }
+[data-theme="light"] [class*="bg-[#15181d]"] { background-color: #ffffff !important; }
+[data-theme="light"] [class*="bg-[#1a1d22]"],
+[data-theme="light"] [class*="bg-[#1b1e24]"],
+[data-theme="light"] [class*="bg-[#191c21]"] { background-color: #f8fafb !important; }
+[data-theme="light"] [class*="text-white"] { color: #17202b !important; }
+[data-theme="light"] [class*="text-[#eef1f4]"],
+[data-theme="light"] [class*="text-[#e3e6e9]"],
+[data-theme="light"] [class*="text-[#d7dce1]"],
+[data-theme="light"] [class*="text-[#d4dae0]"],
+[data-theme="light"] [class*="text-[#cbd1d7]"],
+[data-theme="light"] [class*="text-[#c6cdd4]"],
+[data-theme="light"] [class*="text-[#c4cbd3]"] { color: #24303d !important; }
+[data-theme="light"] [class*="border-[#20242b]"],
+[data-theme="light"] [class*="border-[#252a32]"],
+[data-theme="light"] [class*="border-[#292e36]"],
+[data-theme="light"] [class*="border-[#2b3038]"],
+[data-theme="light"] [class*="border-[#343a44]"],
+[data-theme="light"] [class*="border-[#303640]"],
+[data-theme="light"] [class*="border-[#2d333b]"] { border-color: #dce2e8 !important; }
+[data-theme="light"] [class*="divide-[#252a32]"] > :not([hidden]) ~ :not([hidden]) { border-color: #e3e7eb !important; }
+[data-theme="light"] .field { background: #ffffff; color: #17202b; border-color: #cfd7df; }
+[data-theme="light"] .field option { background: #ffffff; color: #17202b; }
+[data-theme="light"] header { background-color: rgba(244, 246, 248, .92) !important; }
+[data-theme="light"] .mango-mark { color: #17202b; }
+[data-theme="light"] ::-webkit-scrollbar-track { background: #f4f6f8; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: #c8d0d8; }
