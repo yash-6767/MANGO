@@ -1,7 +1,7 @@
 import React from 'react';
-import { ExternalLink, Bookmark, CheckCircle2, AlertTriangle, Archive, Clock, Sparkles, Tag, ShieldCheck } from 'lucide-react';
+import { ExternalLink, Bookmark, CheckCircle2, AlertTriangle, Archive, Clock, Sparkles, Tag, ShieldCheck, AlertCircle } from 'lucide-react';
 import { LearningResource } from '../../types/resources';
-import { isNewResource, extractDomain } from '../../utils/resourceUtils';
+import { isNewResource, extractDomain, needsVerification } from '../../utils/resourceUtils';
 
 interface ResourceCardProps {
   resource: LearningResource;
@@ -21,19 +21,20 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
   isAdmin = false,
 }) => {
   const isNew = isNewResource(resource.date_added);
+  const requiresAudit = needsVerification(resource.last_verified);
   const domain = extractDomain(resource.url);
 
   // Difficulty badge styling
   const getDifficultyBadge = (difficulty: string) => {
     switch (difficulty) {
       case 'Beginner':
-        return 'bg-[#DCE6D8] text-[#176B50] border-[#A8B5A0]/40';
+        return 'bg-[var(--sage-soft)] text-[var(--emerald-primary)] border-[var(--sage)]/40';
       case 'Intermediate':
-        return 'bg-[#F4F0E6] text-[#5F7563] border-[#DDDCCF]';
+        return 'bg-[var(--bg-primary)] text-[var(--sage-dark)] border-[var(--border-color)]';
       case 'Advanced':
-        return 'bg-[#E6DDC8] text-[#104C3A] border-[#DDDCCF]';
+        return 'bg-[var(--bg-muted)] text-[var(--emerald-deep)] border-[var(--border-color)]';
       default:
-        return 'bg-[#FAF8F2] text-[#24332B] border-[#DDDCCF]';
+        return 'bg-[var(--bg-secondary)] text-[var(--text-main)] border-[var(--border-color)]';
     }
   };
 
@@ -43,19 +44,19 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
         return null;
       case 'Under Review':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
+          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
             <Clock className="h-3 w-3" /> Under Review
           </span>
         );
       case 'Broken':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200">
+          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
             <AlertTriangle className="h-3 w-3" /> Broken URL
           </span>
         );
       case 'Archived':
         return (
-          <span className="inline-flex items-center gap-1 rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-bold text-stone-600 border border-stone-200">
+          <span className="inline-flex items-center gap-1 rounded-md bg-stone-100 dark:bg-stone-900 px-2 py-0.5 text-[10px] font-bold text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-800">
             <Archive className="h-3 w-3" /> Archived
           </span>
         );
@@ -63,27 +64,37 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
   };
 
   return (
-    <div className={`group relative flex flex-col justify-between rounded-2xl border transition-all duration-200 hover:shadow-lg ${
-      resource.status === 'Archived' 
-        ? 'opacity-70 bg-[#FAF8F2] border-[#DDDCCF]' 
-        : 'bg-white border-[#DDDCCF] hover:border-[#A8B5A0]'
-    } p-5 sm:p-6`}>
+    <div
+      className={`group relative flex flex-col justify-between rounded-2xl border transition-all duration-200 hover:shadow-lg ${
+        resource.status === 'Archived'
+          ? 'opacity-70 bg-[var(--bg-secondary)] border-[var(--border-color)]'
+          : 'bg-[var(--bg-card)] border-[var(--border-color)] hover:border-[var(--sage)]'
+      } p-5 sm:p-6 text-[var(--text-main)]`}
+    >
       {/* Top Bar: Provider, Domain, Badges & Bookmark */}
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-lg bg-[#FAF8F2] px-2.5 py-1 text-xs font-bold text-[#5F7563] border border-[#DDDCCF]/60">
+            <span className="rounded-lg bg-[var(--bg-secondary)] px-2.5 py-1 text-xs font-bold text-[var(--sage-dark)] border border-[var(--border-color)]/60">
               {resource.provider}
             </span>
-            <span className="text-[11px] font-medium text-[#68766C]">
+            <span className="text-[11px] font-medium text-[var(--text-muted)]">
               {domain}
             </span>
             {isNew && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#176B50] px-2.5 py-0.5 text-[10px] font-extrabold tracking-wider text-white shadow-sm">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--emerald-primary)] px-2.5 py-0.5 text-[10px] font-extrabold tracking-wider text-white shadow-sm">
                 <Sparkles className="h-3 w-3" /> NEW
               </span>
             )}
             {getStatusBadge(resource.status)}
+            {requiresAudit && resource.status === 'Active' && (
+              <span
+                title="Last verified more than 90 days ago"
+                className="inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300 border border-amber-200"
+              >
+                <AlertCircle className="h-3 w-3" /> Needs Audit
+              </span>
+            )}
           </div>
 
           <button
@@ -91,8 +102,8 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             title={isBookmarked ? 'Remove from bookmarks' : 'Save to bookmarks'}
             className={`rounded-xl p-2 transition ${
               isBookmarked
-                ? 'bg-[#DCE6D8] text-[#176B50]'
-                : 'text-[#68766C] hover:bg-[#FAF8F2] hover:text-[#24332B]'
+                ? 'bg-[var(--sage-soft)] text-[var(--emerald-primary)]'
+                : 'text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-main)]'
             }`}
             aria-label="Bookmark resource"
           >
@@ -103,14 +114,14 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
         {/* Title & Category */}
         <div className="mt-3.5">
           <div className="flex items-center gap-2">
-            <span className="inline-block rounded-md bg-[#FAF8F2] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#5F7563] border border-[#DDDCCF]">
+            <span className="inline-block rounded-md bg-[var(--bg-secondary)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--sage-dark)] border border-[var(--border-color)]">
               {resource.category}
             </span>
           </div>
-          <h3 className="font-display mt-2 text-lg font-bold tracking-tight text-[#24332B] group-hover:text-[#176B50] transition-colors">
+          <h3 className="font-display mt-2 text-lg font-bold tracking-tight text-[var(--text-main)] group-hover:text-[var(--emerald-primary)] transition-colors">
             {resource.name}
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-[#68766C] line-clamp-3">
+          <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)] line-clamp-3">
             {resource.description}
           </p>
         </div>
@@ -121,14 +132,14 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             {resource.tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 rounded-md bg-[#FAF8F2] px-2 py-0.5 text-[11px] font-medium text-[#5F7563] border border-[#DDDCCF]/80"
+                className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-secondary)] px-2 py-0.5 text-[11px] font-medium text-[var(--sage-dark)] border border-[var(--border-color)]/80"
               >
                 <Tag className="h-2.5 w-2.5 opacity-60" />
                 {tag}
               </span>
             ))}
             {resource.tags.length > 4 && (
-              <span className="rounded-md bg-[#FAF8F2] px-1.5 py-0.5 text-[10px] font-semibold text-[#68766C]">
+              <span className="rounded-md bg-[var(--bg-secondary)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--text-muted)]">
                 +{resource.tags.length - 4}
               </span>
             )}
@@ -137,14 +148,14 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
 
         {/* Paid features / disclosures if any */}
         {resource.paid_features && (
-          <div className="mt-3 rounded-xl bg-[#FAF8F2] p-2.5 border border-[#DDDCCF]/70 text-[11px] text-[#5F7563] leading-tight">
-            <span className="font-bold text-[#24332B]">Disclosure:</span> {resource.paid_features}
+          <div className="mt-3 rounded-xl bg-[var(--bg-secondary)] p-2.5 border border-[var(--border-color)]/70 text-[11px] text-[var(--sage-dark)] leading-tight">
+            <span className="font-bold text-[var(--text-main)]">Disclosure:</span> {resource.paid_features}
           </div>
         )}
 
         {/* Recommended Learning Path */}
         {resource.learning_path && (
-          <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-medium text-[#176B50]">
+          <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-medium text-[var(--emerald-primary)]">
             <CheckCircle2 className="h-3 w-3 shrink-0" />
             <span className="truncate">{resource.learning_path}</span>
           </div>
@@ -152,21 +163,21 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
       </div>
 
       {/* Footer Info & Actions */}
-      <div className="mt-5 border-t border-[#DDDCCF]/80 pt-4">
+      <div className="mt-5 border-t border-[var(--border-color)]/80 pt-4">
         <div className="flex items-center justify-between gap-2 text-xs">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className={`rounded-md border px-2 py-0.5 text-[10px] font-bold ${getDifficultyBadge(resource.difficulty)}`}>
               {resource.difficulty}
             </span>
-            <span className="rounded-md border border-[#A8B5A0]/60 bg-[#DCE6D8]/60 px-2 py-0.5 text-[10px] font-bold text-[#176B50]">
+            <span className="rounded-md border border-[var(--sage)]/60 bg-[var(--sage-soft)]/60 px-2 py-0.5 text-[10px] font-bold text-[var(--emerald-primary)]">
               {resource.free_status}
             </span>
           </div>
 
-          <div className="flex items-center gap-1 text-[11px] text-[#68766C]" title={`Last verified: ${resource.last_verified}`}>
-            <ShieldCheck className="h-3.5 w-3.5 text-[#176B50]" />
+          <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)]" title={`Last verified: ${resource.last_verified}`}>
+            <ShieldCheck className="h-3.5 w-3.5 text-[var(--emerald-primary)]" />
             <span className="hidden sm:inline">Verified:</span>
-            <span>{resource.last_verified.substring(5)}</span>
+            <span>{resource.last_verified}</span>
           </div>
         </div>
 
@@ -176,7 +187,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             href={resource.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#176B50] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#104C3A] active:scale-[0.98] shadow-sm"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--emerald-primary)] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--emerald-deep)] active:scale-[0.98] shadow-sm"
           >
             <span>Open Resource</span>
             <ExternalLink className="h-3.5 w-3.5" />
@@ -187,7 +198,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
               {onEdit && (
                 <button
                   onClick={() => onEdit(resource)}
-                  className="rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3 py-2.5 text-xs font-bold text-[#24332B] hover:bg-[#E6DDC8]"
+                  className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2.5 text-xs font-bold text-[var(--text-main)] hover:bg-[var(--bg-muted)]"
                   title="Edit resource"
                 >
                   Edit
@@ -196,7 +207,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
               {onUpdateStatus && resource.status !== 'Archived' && (
                 <button
                   onClick={() => onUpdateStatus(resource.id, 'Archived')}
-                  className="rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] p-2.5 text-xs font-bold text-[#68766C] hover:bg-[#E6DDC8]"
+                  className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-2.5 text-xs font-bold text-[var(--text-muted)] hover:bg-[var(--bg-muted)]"
                   title="Archive resource"
                 >
                   <Archive className="h-3.5 w-3.5" />

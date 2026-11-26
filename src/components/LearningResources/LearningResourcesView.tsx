@@ -8,11 +8,10 @@ import {
   Bookmark,
   ShieldCheck,
   CheckCircle,
-  Clock,
   Layers,
   Search,
 } from 'lucide-react';
-import { LearningResource, ResourceCategory } from '../../types/resources';
+import { LearningResource } from '../../types/resources';
 import { RESOURCE_CATEGORIES } from '../../data/initialResources';
 import { ResourceCard } from './ResourceCard';
 import { ResourceFilters, SortOption } from './ResourceFilters';
@@ -39,7 +38,7 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
-  const [freeOnly, setFreeOnly] = useState(false);
+  const [selectedFreeStatus, setSelectedFreeStatus] = useState('All');
   const [newOnly, setNewOnly] = useState(false);
   const [bookmarkedOnly, setBookmarkedOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
@@ -89,8 +88,8 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
           return false;
         }
 
-        // Free only filter
-        if (freeOnly && !resource.free_status.includes('100% Free') && resource.free_status !== 'Free') {
+        // Free status filter
+        if (selectedFreeStatus !== 'All' && resource.free_status !== selectedFreeStatus) {
           return false;
         }
 
@@ -119,17 +118,17 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
             return new Date(b.date_added).getTime() - new Date(a.date_added).getTime();
         }
       });
-  }, [resources, search, selectedCategory, selectedDifficulty, freeOnly, newOnly, bookmarkedOnly, sortBy, bookmarkedIds]);
+  }, [resources, search, selectedCategory, selectedDifficulty, selectedFreeStatus, newOnly, bookmarkedOnly, sortBy, bookmarkedIds]);
 
   const hasActiveFilters = Boolean(
-    search || selectedCategory !== 'All' || selectedDifficulty !== 'All' || freeOnly || newOnly || bookmarkedOnly
+    search || selectedCategory !== 'All' || selectedDifficulty !== 'All' || selectedFreeStatus !== 'All' || newOnly || bookmarkedOnly
   );
 
   const handleResetFilters = () => {
     setSearch('');
     setSelectedCategory('All');
     setSelectedDifficulty('All');
-    setFreeOnly(false);
+    setSelectedFreeStatus('All');
     setNewOnly(false);
     setBookmarkedOnly(false);
   };
@@ -176,17 +175,17 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
   const totalNew = resources.filter((r) => isNewResource(r.date_added)).length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-[var(--text-main)]">
       {/* Page Header */}
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#A8B5A0]/50 bg-[#DCE6D8]/60 px-3 py-1 text-[11px] font-bold uppercase tracking-[.18em] text-[#176B50]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--sage)]/50 bg-[var(--sage-soft)]/60 px-3 py-1 text-[11px] font-bold uppercase tracking-[.18em] text-[var(--emerald-primary)]">
             <BookOpen className="h-3.5 w-3.5" /> Curated Learning Library
           </div>
-          <h2 className="font-display mt-2 text-3xl font-extrabold tracking-[-.045em] text-[#24332B] sm:text-[36px]">
+          <h2 className="font-display mt-2 text-3xl font-extrabold tracking-[-.045em] text-[var(--text-main)] sm:text-[36px]">
             Master the fundamentals.
           </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#68766C]">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-muted)]">
             Verified free resources, roadmaps, university courses, and practice platforms curated specifically for students preparing for software engineering careers.
           </p>
         </div>
@@ -195,17 +194,17 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1.5 rounded-xl border border-[#DDDCCF] bg-white px-3.5 py-2.5 text-xs font-bold text-[#24332B] hover:bg-[#FAF8F2] shadow-sm transition"
+            className="flex items-center gap-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3.5 py-2.5 text-xs font-bold text-[var(--text-main)] hover:bg-[var(--bg-secondary)] shadow-sm transition"
           >
-            <Upload className="h-3.5 w-3.5 text-[#176B50]" />
+            <Upload className="h-3.5 w-3.5 text-[var(--emerald-primary)]" />
             Import (JSON)
           </button>
 
           <button
             onClick={handleExportJson}
-            className="flex items-center gap-1.5 rounded-xl border border-[#DDDCCF] bg-white px-3.5 py-2.5 text-xs font-bold text-[#24332B] hover:bg-[#FAF8F2] shadow-sm transition"
+            className="flex items-center gap-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3.5 py-2.5 text-xs font-bold text-[var(--text-main)] hover:bg-[var(--bg-secondary)] shadow-sm transition"
           >
-            <Download className="h-3.5 w-3.5 text-[#5F7563]" />
+            <Download className="h-3.5 w-3.5 text-[var(--sage-dark)]" />
             Export
           </button>
 
@@ -214,7 +213,7 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
               setEditingResource(null);
               setShowFormModal(true);
             }}
-            className="flex items-center gap-1.5 rounded-xl bg-[#176B50] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#104C3A] shadow-sm transition"
+            className="flex items-center gap-1.5 rounded-xl bg-[var(--emerald-primary)] px-4 py-2.5 text-xs font-bold text-white hover:bg-[var(--emerald-deep)] shadow-sm transition"
           >
             <Plus className="h-4 w-4" />
             Add Resource
@@ -224,64 +223,64 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
 
       {/* Metrics Row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-[#DDDCCF] bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="rounded-xl p-2.5 bg-[#DCE6D8] text-[#176B50]">
+            <span className="rounded-xl p-2.5 bg-[var(--sage-soft)] text-[var(--emerald-primary)]">
               <Layers className="h-4 w-4" />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#68766C]">Active Resources</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active Resources</span>
           </div>
-          <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-[#24332B]">{totalActive}</p>
-          <p className="mt-1 text-xs text-[#68766C]">across {RESOURCE_CATEGORIES.length} tech categories</p>
+          <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-[var(--text-main)]">{totalActive}</p>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">across {RESOURCE_CATEGORIES.length} tech categories</p>
         </div>
 
-        <div className="rounded-2xl border border-[#DDDCCF] bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="rounded-xl p-2.5 bg-[#DCE6D8] text-[#176B50]">
+            <span className="rounded-xl p-2.5 bg-[var(--sage-soft)] text-[var(--emerald-primary)]">
               <CheckCircle className="h-4 w-4" />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#68766C]">100% Free Materials</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">100% Free Materials</span>
           </div>
-          <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-[#24332B]">{totalFree}</p>
-          <p className="mt-1 text-xs text-[#68766C]">no paywalls on core learning</p>
+          <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-[var(--text-main)]">{totalFree}</p>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">no paywalls on core learning</p>
         </div>
 
-        <div className="rounded-2xl border border-[#DDDCCF] bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="rounded-xl p-2.5 bg-[#E6DDC8] text-[#104C3A]">
+            <span className="rounded-xl p-2.5 bg-[var(--bg-muted)] text-[var(--emerald-deep)]">
               <Sparkles className="h-4 w-4" />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#68766C]">New This Month</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">New This Month</span>
           </div>
-          <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-[#24332B]">{totalNew}</p>
-          <p className="mt-1 text-xs text-[#68766C]">added in last 30 days</p>
+          <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-[var(--text-main)]">{totalNew}</p>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">added in last 30 days</p>
         </div>
 
-        <div className="rounded-2xl border border-[#DDDCCF] bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="rounded-xl p-2.5 bg-[#F4F0E6] text-[#5F7563]">
+            <span className="rounded-xl p-2.5 bg-[var(--bg-primary)] text-[var(--sage-dark)]">
               <Bookmark className="h-4 w-4" />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#68766C]">Your Bookmarks</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Your Bookmarks</span>
           </div>
-          <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-[#24332B]">{bookmarkedIds.length}</p>
-          <p className="mt-1 text-xs text-[#68766C]">saved for quick study</p>
+          <p className="font-display mt-3 text-2xl font-extrabold tracking-tight text-[var(--text-main)]">{bookmarkedIds.length}</p>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">saved for quick study</p>
         </div>
       </div>
 
       {/* Featured Resources Section (when no active filters) */}
       {!hasActiveFilters && featuredResources.length > 0 && (
-        <section className="rounded-3xl border border-[#DDDCCF] bg-[#FAF8F2] p-6 sm:p-8">
+        <section className="rounded-3xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-6 sm:p-8">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.16em] text-[#176B50]">
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.16em] text-[var(--emerald-primary)]">
                 <Sparkles className="h-3.5 w-3.5" /> High-Impact Starters
               </div>
-              <h3 className="font-display mt-1 text-xl font-extrabold text-[#24332B]">
+              <h3 className="font-display mt-1 text-xl font-extrabold text-[var(--text-main)]">
                 Essential Foundations for SWE Internships & Roles
               </h3>
             </div>
-            <span className="rounded-full bg-white border border-[#DDDCCF] px-3 py-1 text-xs font-bold text-[#5F7563]">
+            <span className="rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] px-3 py-1 text-xs font-bold text-[var(--sage-dark)]">
               Top {featuredResources.length} Curated
             </span>
           </div>
@@ -314,8 +313,8 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
           onCategoryChange={setSelectedCategory}
           selectedDifficulty={selectedDifficulty}
           onDifficultyChange={setSelectedDifficulty}
-          freeOnly={freeOnly}
-          onFreeOnlyChange={setFreeOnly}
+          selectedFreeStatus={selectedFreeStatus}
+          onFreeStatusChange={setSelectedFreeStatus}
           newOnly={newOnly}
           onNewOnlyChange={setNewOnly}
           bookmarkedOnly={bookmarkedOnly}
@@ -329,10 +328,11 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
         />
 
         {/* Search Results Count & Status */}
-        <div className="flex items-center justify-between border-b border-[#DDDCCF] pb-3 text-xs text-[#68766C]">
+        <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3 text-xs text-[var(--text-muted)]">
           <span>
-            Showing <strong className="text-[#24332B]">{filteredResources.length}</strong> {filteredResources.length === 1 ? 'resource' : 'resources'}
+            Showing <strong className="text-[var(--text-main)]">{filteredResources.length}</strong> {filteredResources.length === 1 ? 'resource' : 'resources'}
             {selectedCategory !== 'All' && <span> in <strong>{selectedCategory}</strong></span>}
+            {selectedFreeStatus !== 'All' && <span> ({selectedFreeStatus})</span>}
           </span>
           <span className="hidden sm:inline">
             Sorted by {sortBy === 'recent' ? 'Recently Added' : sortBy === 'verified' ? 'Last Verified' : sortBy === 'alphabetical' ? 'A-Z' : 'Category'}
@@ -358,18 +358,18 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl border border-[#DDDCCF] bg-white py-16 px-6 text-center shadow-sm">
-            <span className="inline-flex rounded-2xl bg-[#FAF8F2] p-4 text-[#5F7563] border border-[#DDDCCF]">
+          <div className="rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] py-16 px-6 text-center shadow-sm">
+            <span className="inline-flex rounded-2xl bg-[var(--bg-secondary)] p-4 text-[var(--sage-dark)] border border-[var(--border-color)]">
               <Search className="h-6 w-6" />
             </span>
-            <h4 className="font-display mt-4 text-lg font-bold text-[#24332B]">No resources match your filters</h4>
-            <p className="mt-2 text-xs text-[#68766C] max-w-sm mx-auto">
+            <h4 className="font-display mt-4 text-lg font-bold text-[var(--text-main)]">No resources match your filters</h4>
+            <p className="mt-2 text-xs text-[var(--text-muted)] max-w-sm mx-auto">
               We couldn't find any resources matching your current search terms or category selection.
             </p>
             <div className="mt-6 flex justify-center gap-3">
               <button
                 onClick={handleResetFilters}
-                className="rounded-xl bg-[#176B50] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#104C3A]"
+                className="rounded-xl bg-[var(--emerald-primary)] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--emerald-deep)]"
               >
                 Clear all filters
               </button>
@@ -378,7 +378,7 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
                   setEditingResource(null);
                   setShowFormModal(true);
                 }}
-                className="rounded-xl border border-[#DDDCCF] bg-white px-4 py-2.5 text-xs font-bold text-[#24332B] hover:bg-[#FAF8F2]"
+                className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2.5 text-xs font-bold text-[var(--text-main)] hover:bg-[var(--bg-secondary)]"
               >
                 Suggest this resource
               </button>
@@ -388,13 +388,13 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
       </section>
 
       {/* Monthly Verification & Criteria Explainer Card */}
-      <section className="rounded-2xl border border-[#DDDCCF] bg-[#FAF8F2] p-6 text-xs text-[#5F7563]">
-        <div className="flex items-center gap-2 font-bold text-[#104C3A] mb-2 text-sm">
-          <ShieldCheck className="h-4 w-4 text-[#176B50]" />
+      <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-6 text-xs text-[var(--sage-dark)]">
+        <div className="flex items-center gap-2 font-bold text-[var(--emerald-primary)] mb-2 text-sm">
+          <ShieldCheck className="h-4 w-4 text-[var(--emerald-primary)]" />
           Monthly Verification Standard & Automation Pipeline
         </div>
-        <p className="leading-relaxed text-[#68766C]">
-          Every resource in this library is audited on a 30-day recurring schedule for active links, educational value, and free-tier access. Resources added within 30 days automatically display the <span className="font-bold text-[#176B50]">NEW</span> badge. Outdated links are archived rather than deleted to maintain bookmark continuity. New batches can be imported via structured JSON anytime without code modifications.
+        <p className="leading-relaxed text-[var(--text-muted)]">
+          Every resource in this library is audited on a 30-day recurring schedule for active links, educational value, and free-tier access. Resources added within 30 days automatically display the <span className="font-bold text-[var(--emerald-primary)]">NEW</span> badge. Outdated links are archived rather than deleted to maintain bookmark continuity. New batches can be imported via structured JSON anytime without code modifications.
         </p>
       </section>
 

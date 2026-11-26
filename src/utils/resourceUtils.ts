@@ -11,8 +11,20 @@ import {
 } from '../types/resources';
 import { RESOURCE_CATEGORIES } from '../data/initialResources';
 
+export const VALID_DIFFICULTIES: DifficultyLevel[] = ['Beginner', 'Intermediate', 'Advanced', 'All Levels'];
+
+export const VALID_FREE_STATUSES: FreeStatus[] = [
+  '100% Free',
+  'Free Course',
+  'Free with Optional Certificate',
+  'Free Tier Available',
+  'Free',
+];
+
+export const VALID_STATUSES: ResourceStatus[] = ['Active', 'Under Review', 'Broken', 'Archived'];
+
 /**
- * Normalizes a URL for robust comparison:
+ * Normalizes a URL for comparison:
  * - strips protocol (http/https)
  * - converts hostname to lowercase
  * - removes www.
@@ -26,9 +38,9 @@ export function normalizeUrl(rawUrl: string): string {
       clean = 'https://' + clean;
     }
     const parsed = new URL(clean);
-    // remove tracking params
+    // Remove analytics & tracking parameters
     const searchParams = new URLSearchParams(parsed.search);
-    const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'ref', 'source'];
+    const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'ref', 'source', 'fbclid', 'gclid'];
     trackingParams.forEach((param) => searchParams.delete(param));
 
     let hostname = parsed.hostname.toLowerCase();
@@ -61,6 +73,17 @@ export function extractDomain(url: string): string {
 }
 
 /**
+ * Validates date string in YYYY-MM-DD format.
+ */
+export function isValidDateString(dateStr: string): boolean {
+  if (!dateStr || typeof dateStr !== 'string') return false;
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!regex.test(dateStr)) return false;
+  const d = new Date(dateStr);
+  return !isNaN(d.getTime());
+}
+
+/**
  * Checks if a resource was added within the last 30 days.
  */
 export function isNewResource(dateAddedStr: string): boolean {
@@ -73,6 +96,22 @@ export function isNewResource(dateAddedStr: string): boolean {
     return now >= addedTime && now - addedTime <= thirtyDaysMs;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Checks if a resource needs verification (> 90 days since last verification).
+ */
+export function needsVerification(lastVerifiedStr: string): boolean {
+  if (!lastVerifiedStr) return true;
+  try {
+    const verifiedTime = new Date(lastVerifiedStr).getTime();
+    if (isNaN(verifiedTime)) return true;
+    const now = Date.now();
+    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+    return now - verifiedTime > ninetyDaysMs;
+  } catch {
+    return true;
   }
 }
 
@@ -115,6 +154,7 @@ export function findDuplicate(
 
 /**
  * Validates and previews a monthly JSON import payload against existing resources.
+ * STRICT ENFORCEMENT: Any resource with a validation error is NEVER added to toAdd.
  */
 export function validateAndPreviewImport(
   rawJson: string | object,
@@ -154,45 +194,136 @@ export function validateAndPreviewImport(
   const todayStr = new Date().toISOString().split('T')[0];
 
   rawList.forEach((raw, idx) => {
-    const item = raw as Record<string, unknown>;
-    const name = typeof item.name === 'string' ? item.name.trim() : '';
-    const url = typeof item.url === 'string' ? item.url.trim() : '';
-    const provider = typeof item.provider === 'string' ? item.provider.trim() : '';
-    const description = typeof item.description === 'string' ? item.description.trim() : '';
-    const categoryRaw = typeof item.category === 'string' ? item.category.trim() : '';
-
-    if (!name) {
-      errors.push({ index: idx, field: 'name', message: 'Resource name is required.' });
+    if (!raw || typeof raw !== 'object') {
+      errors.push({ index: idx, field: 'item', message: 'Item must be a valid JSON object.' });
+      return;
     }
+
+    const item = raw as Record<string, unknown>;
+    const itemErrors: string[] = [];
+
+    // 1. Name validation
+    const name = typeof item.name === 'string' ? item.name.trim() : '';
+    if (!name) {
+      itemErrors.push('Resource name is required.');
+    } else if (name.length < 2) {
+      itemErrors.push('Resource name must be at least 2 characters.');
+    }
+
+    // 2. URL validation (must be valid HTTPS or HTTP URL)
+    const url = typeof item.url === 'string' ? item.url.trim() : '';
     if (!url) {
-      errors.push({ index: idx, name, field: 'url', message: 'Resource official URL is required.' });
+      itemErrors.push('Resource official URL is required.');
     } else {
       try {
-        new URL(url.startsWith('http') ? url : `https://${url}`);
+        const parsedUrl = new URL(url);
+        if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+          itemErrors.push('URL protocol must be https:// or http://.');
+        }
       } catch {
-        errors.push({ index: idx, name, field: 'url', message: 'Invalid URL format.' });
+        itemErrors.push('Invalid URL format.');
       }
     }
-    if (!description) {
-      errors.push({ index: idx, name, field: 'description', message: 'Short description is required.' });
-    }
+
+    // 3. Provider validation
+    const provider = typeof item.provider === 'string' ? item.provider.trim() : '';
     if (!provider) {
-      errors.push({ index: idx, name, field: 'provider', message: 'Provider/Organization is required.' });
+      itemErrors.push('Provider / Organization name is required.');
     }
 
-    // Match or fallback category
-    let category: ResourceCategory = 'Computer Science Fundamentals';
+    // 4. Description validation
+    const description = typeof item.description === 'string' ? item.description.trim() : '';
+    if (!description) {
+      itemErrors.push('Short description is required.');
+    } else if (description.length < 10) {
+      itemErrors.push('Description should be at least 10 characters.');
+    }
+
+    // 5. Category validation & normalization
+    const categoryRaw = typeof item.category === 'string' ? item.category.trim() : '';
+    let category: ResourceCategory | null = null;
     if (categoryRaw && RESOURCE_CATEGORIES.includes(categoryRaw as ResourceCategory)) {
       category = categoryRaw as ResourceCategory;
     } else if (categoryRaw) {
-      // Find case-insensitive partial match
       const matched = RESOURCE_CATEGORIES.find((cat) => cat.toLowerCase() === categoryRaw.toLowerCase());
       if (matched) {
         category = matched;
       }
     }
+    if (!category) {
+      itemErrors.push(
+        `Category "${categoryRaw || 'empty'}" is invalid. Must be one of: ${RESOURCE_CATEGORIES.join(', ')}`
+      );
+    }
 
-    // Duplicate check within batch
+    // 6. Difficulty validation
+    let difficulty: DifficultyLevel = 'All Levels';
+    if (item.difficulty !== undefined) {
+      if (VALID_DIFFICULTIES.includes(item.difficulty as DifficultyLevel)) {
+        difficulty = item.difficulty as DifficultyLevel;
+      } else {
+        itemErrors.push(`Invalid difficulty "${String(item.difficulty)}". Must be Beginner, Intermediate, Advanced, or All Levels.`);
+      }
+    }
+
+    // 7. Free Status validation
+    let free_status: FreeStatus = '100% Free';
+    if (item.free_status !== undefined) {
+      if (VALID_FREE_STATUSES.includes(item.free_status as FreeStatus)) {
+        free_status = item.free_status as FreeStatus;
+      } else {
+        itemErrors.push(`Invalid free_status "${String(item.free_status)}". Allowed: ${VALID_FREE_STATUSES.join(', ')}`);
+      }
+    }
+
+    // 8. Resource Status validation
+    let status: ResourceStatus = 'Active';
+    if (item.status !== undefined) {
+      if (VALID_STATUSES.includes(item.status as ResourceStatus)) {
+        status = item.status as ResourceStatus;
+      } else {
+        itemErrors.push(`Invalid status "${String(item.status)}". Allowed: ${VALID_STATUSES.join(', ')}`);
+      }
+    }
+
+    // 9. Dates validation
+    let date_added = todayStr;
+    if (item.date_added !== undefined) {
+      if (typeof item.date_added === 'string' && isValidDateString(item.date_added)) {
+        date_added = item.date_added;
+      } else {
+        itemErrors.push(`Invalid date_added "${String(item.date_added)}". Must be YYYY-MM-DD.`);
+      }
+    }
+
+    let last_verified = todayStr;
+    if (item.last_verified !== undefined) {
+      if (typeof item.last_verified === 'string' && isValidDateString(item.last_verified)) {
+        last_verified = item.last_verified;
+      } else {
+        itemErrors.push(`Invalid last_verified "${String(item.last_verified)}". Must be YYYY-MM-DD.`);
+      }
+    }
+
+    // 10. Tags validation
+    let tags: string[] = [];
+    if (item.tags !== undefined) {
+      if (Array.isArray(item.tags)) {
+        tags = item.tags.map((t) => String(t).trim()).filter(Boolean);
+      } else {
+        itemErrors.push('Tags must be an array of strings.');
+      }
+    }
+
+    // CRITICAL FIX: If ANY validation error occurred, record all issues and DO NOT PROCEED TO ADD!
+    if (itemErrors.length > 0) {
+      itemErrors.forEach((msg) => {
+        errors.push({ index: idx, name: name || `Item #${idx + 1}`, field: 'validation', message: msg });
+      });
+      return; // STOP! Never add an invalid resource to toAdd!
+    }
+
+    // 11. Duplicate check within the import batch
     const normUrl = normalizeUrl(url);
     const normName = name.toLowerCase();
 
@@ -202,31 +333,31 @@ export function validateAndPreviewImport(
           id: `batch-dup-${idx}`,
           name,
           url,
-          provider: provider || 'Unknown',
-          description: description || '',
-          category,
-          tags: Array.isArray(item.tags) ? (item.tags as string[]) : [],
-          difficulty: (item.difficulty as DifficultyLevel) || 'Beginner',
-          free_status: (item.free_status as FreeStatus) || 'Free',
-          date_added: (item.date_added as string) || todayStr,
-          last_verified: (item.last_verified as string) || todayStr,
-          status: (item.status as ResourceStatus) || 'Active',
+          provider,
+          description,
+          category: category!,
+          tags,
+          difficulty,
+          free_status,
+          date_added,
+          last_verified,
+          status,
         },
         matchedWith: {
           id: 'batch-earlier',
           name,
           url,
-          provider: provider || 'Unknown',
+          provider,
           description: '',
-          category,
+          category: category!,
           tags: [],
-          difficulty: 'Beginner',
-          free_status: 'Free',
-          date_added: todayStr,
-          last_verified: todayStr,
+          difficulty,
+          free_status,
+          date_added,
+          last_verified,
           status: 'Active',
         },
-        matchReason: 'normalized_url',
+        matchReason: seenBatchUrls.has(normUrl) ? 'normalized_url' : 'exact_name',
       });
       return;
     }
@@ -234,7 +365,7 @@ export function validateAndPreviewImport(
     seenBatchUrls.add(normUrl);
     seenBatchNames.add(normName);
 
-    // Duplicate check against existing library
+    // 12. Duplicate check against existing library
     const dupMatch = findDuplicate({ name, url, provider }, existingResources);
     if (dupMatch) {
       duplicates.push({
@@ -242,15 +373,15 @@ export function validateAndPreviewImport(
           id: `dup-${idx}`,
           name,
           url,
-          provider: provider || dupMatch.matchedWith.provider,
-          description: description || dupMatch.matchedWith.description,
-          category,
-          tags: Array.isArray(item.tags) ? (item.tags as string[]) : [],
-          difficulty: (item.difficulty as DifficultyLevel) || 'Beginner',
-          free_status: (item.free_status as FreeStatus) || 'Free',
-          date_added: (item.date_added as string) || todayStr,
-          last_verified: (item.last_verified as string) || todayStr,
-          status: (item.status as ResourceStatus) || 'Active',
+          provider,
+          description,
+          category: category!,
+          tags,
+          difficulty,
+          free_status,
+          date_added,
+          last_verified,
+          status,
         },
         matchedWith: dupMatch.matchedWith,
         matchReason: dupMatch.matchReason,
@@ -258,47 +389,26 @@ export function validateAndPreviewImport(
       return;
     }
 
-    if (name && url && description && provider) {
-      const difficulty: DifficultyLevel = ['Beginner', 'Intermediate', 'Advanced', 'All Levels'].includes(
-        item.difficulty as string
-      )
-        ? (item.difficulty as DifficultyLevel)
-        : 'All Levels';
+    // Successfully validated and verified unique!
+    const validResource: LearningResource = {
+      id: `res-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 7)}`,
+      name,
+      description,
+      url,
+      provider,
+      category: category!,
+      tags,
+      difficulty,
+      free_status,
+      paid_features: typeof item.paid_features === 'string' ? item.paid_features.trim() : undefined,
+      date_added,
+      last_verified,
+      status,
+      learning_path: typeof item.learning_path === 'string' ? item.learning_path.trim() : undefined,
+      is_featured: Boolean(item.is_featured),
+    };
 
-      const free_status: FreeStatus = [
-        '100% Free',
-        'Free Course',
-        'Free with Optional Certificate',
-        'Free Tier Available',
-        'Free',
-      ].includes(item.free_status as string)
-        ? (item.free_status as FreeStatus)
-        : 'Free';
-
-      const status: ResourceStatus = ['Active', 'Under Review', 'Broken', 'Archived'].includes(item.status as string)
-        ? (item.status as ResourceStatus)
-        : 'Active';
-
-      const newResource: LearningResource = {
-        id: `res-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 7)}`,
-        name,
-        description,
-        url,
-        provider,
-        category,
-        tags: Array.isArray(item.tags) ? (item.tags as string[]) : [],
-        difficulty,
-        free_status,
-        paid_features: typeof item.paid_features === 'string' ? item.paid_features : undefined,
-        date_added: typeof item.date_added === 'string' ? item.date_added : todayStr,
-        last_verified: typeof item.last_verified === 'string' ? item.last_verified : todayStr,
-        status,
-        learning_path: typeof item.learning_path === 'string' ? item.learning_path : undefined,
-        is_featured: Boolean(item.is_featured),
-      };
-
-      toAdd.push(newResource);
-    }
+    toAdd.push(validResource);
   });
 
   return {

@@ -67,30 +67,30 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-[#DDDCCF] bg-white p-6 shadow-2xl sm:p-8 my-8 max-h-[90vh] flex flex-col">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-2xl sm:p-8 my-8 max-h-[90vh] flex flex-col text-[var(--text-main)]">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-[#DDDCCF] pb-4">
+        <div className="flex items-start justify-between border-b border-[var(--border-color)] pb-4">
           <div>
-            <h2 className="font-display text-2xl font-extrabold text-[#24332B]">
+            <h2 className="font-display text-2xl font-extrabold text-[var(--text-main)]">
               {isEditing ? 'Edit Learning Resource' : 'Add New Learning Resource'}
             </h2>
-            <p className="mt-1 text-xs text-[#68766C]">
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
               {isEditing ? 'Update details, verification status, and attributes.' : 'Add a verified free learning resource to the library.'}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-xl p-2 text-[#68766C] hover:bg-[#FAF8F2] hover:text-[#24332B]"
+            className="rounded-xl p-2 text-[var(--text-muted)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-main)]"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto py-4 space-y-4 pr-1 sidebar-scrollbar">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
                 Resource Name *
               </label>
               <input
@@ -99,12 +99,12 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. CS50: Intro to CS"
-                className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
                 Provider / Institution *
               </label>
               <input
@@ -113,13 +113,13 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
                 value={provider}
                 onChange={(e) => setProvider(e.target.value)}
                 placeholder="e.g. Harvard University, MIT, Mozilla"
-                className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
               Official URL *
             </label>
             <input
@@ -128,12 +128,12 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+              className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
               Short Description *
             </label>
             <textarea
@@ -142,19 +142,19 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Provide a clear, student-focused summary of the learning material..."
-              className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] p-3 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+              className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-3 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
                 Category *
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ResourceCategory)}
-                className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
               >
                 {RESOURCE_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -165,13 +165,13 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
                 Difficulty Level
               </label>
               <select
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value as DifficultyLevel)}
-                className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
               >
                 <option value="Beginner">Beginner</option>
                 <option value="Intermediate">Intermediate</option>
@@ -183,13 +183,13 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
                 Free Status
               </label>
               <select
                 value={freeStatus}
                 onChange={(e) => setFreeStatus(e.target.value as FreeStatus)}
-                className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
               >
                 <option value="100% Free">100% Free</option>
                 <option value="Free Course">Free Course</option>
@@ -200,13 +200,13 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
                 Status
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as ResourceStatus)}
-                className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
               >
                 <option value="Active">Active</option>
                 <option value="Under Review">Under Review</option>
@@ -218,7 +218,7 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
                 Tags (comma separated)
               </label>
               <input
@@ -226,25 +226,25 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
                 placeholder="e.g. Python, Algorithms, DSA"
-                className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
                 Last Verification Date
               </label>
               <input
                 type="date"
                 value={lastVerified}
                 onChange={(e) => setLastVerified(e.target.value)}
-                className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
               Paid Features or Certificate Disclosures (Optional)
             </label>
             <input
@@ -252,12 +252,12 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
               value={paidFeatures}
               onChange={(e) => setPaidFeatures(e.target.value)}
               placeholder="e.g. Optional $49 certificate, all course lectures are 100% free"
-              className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+              className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#5F7563] mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--sage-dark)] mb-1.5">
               Recommended Learning Path (Optional)
             </label>
             <input
@@ -265,7 +265,7 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
               value={learningPath}
               onChange={(e) => setLearningPath(e.target.value)}
               placeholder="e.g. Software Engineering Foundations"
-              className="w-full rounded-xl border border-[#DDDCCF] bg-[#FAF8F2] px-3.5 py-2.5 text-xs font-semibold text-[#24332B] outline-none focus:border-[#176B50] focus:bg-white"
+              className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3.5 py-2.5 text-xs font-semibold text-[var(--text-main)] outline-none focus:border-[var(--emerald-primary)] focus:bg-[var(--bg-card)]"
             />
           </div>
 
@@ -275,24 +275,24 @@ export const ResourceFormModal: React.FC<ResourceFormModalProps> = ({
               id="isFeatured"
               checked={isFeatured}
               onChange={(e) => setIsFeatured(e.target.checked)}
-              className="rounded border-[#DDDCCF] text-[#176B50] focus:ring-[#176B50]"
+              className="rounded border-[var(--border-color)] text-[var(--emerald-primary)] focus:ring-[var(--emerald-primary)]"
             />
-            <label htmlFor="isFeatured" className="text-xs font-bold text-[#24332B] cursor-pointer">
+            <label htmlFor="isFeatured" className="text-xs font-bold text-[var(--text-main)] cursor-pointer">
               Highlight in Featured Resources Section
             </label>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-[#DDDCCF] pt-4">
+          <div className="flex items-center justify-end gap-3 border-t border-[var(--border-color)] pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-[#DDDCCF] px-4 py-2.5 text-xs font-bold text-[#5F7563] hover:bg-[#FAF8F2]"
+              className="rounded-xl border border-[var(--border-color)] px-4 py-2.5 text-xs font-bold text-[var(--text-muted)] hover:bg-[var(--bg-secondary)]"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex items-center gap-1.5 rounded-xl bg-[#176B50] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#104C3A] shadow-sm"
+              className="flex items-center gap-1.5 rounded-xl bg-[var(--emerald-primary)] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--emerald-deep)] shadow-sm"
             >
               <Check className="h-4 w-4" />
               {isEditing ? 'Save Changes' : 'Add to Library'}
