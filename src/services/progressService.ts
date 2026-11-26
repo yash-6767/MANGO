@@ -1,5 +1,14 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { CompanyName, UserProfile, QuestionStatus, WorkspaceState } from '../types/user';
+import { storageService, isGenuineGuestData } from './storageService';
+import { INITIAL_RESOURCES } from '../data/initialResources';
+
+export interface SyncResult {
+  state: WorkspaceState;
+  syncedWithCloud: boolean;
+  migratedGuestData: boolean;
+  error?: string;
+}
 
 export const progressService = {
   /**
@@ -18,10 +27,11 @@ export const progressService = {
       return {
         fullName: data.full_name || '',
         university: data.university || '',
-        targetRole: data.target_role || 'Software Engineer',
+        targetRole: data.target_role || '',
         targetCompany: (data.target_company as CompanyName) || 'Meta',
         preferredLanguage: data.preferred_language || 'Python',
         experienceLevel: data.experience_level || 'Beginner / Student',
+        role: (data.role as 'student' | 'mentor' | 'admin') || 'student',
         preferences: data.preferences || {},
       };
     } catch {
@@ -32,23 +42,29 @@ export const progressService = {
   /**
    * Update or upsert user profile
    */
-  async updateProfile(userId: string, profile: Partial<UserProfile>): Promise<boolean> {
-    if (!isSupabaseConfigured || !userId) return false;
+  async updateProfile(userId: string, profile: Partial<UserProfile>): Promise<{ success: boolean; error?: string }> {
+    if (!isSupabaseConfigured || !userId) {
+      return { success: true }; // offline / local save handled by caller
+    }
     try {
-      const { error } = await supabase.from('profiles').upsert({
+      const payload: Record<string, unknown> = {
         id: userId,
-        full_name: profile.fullName,
-        university: profile.university,
-        target_role: profile.targetRole,
-        target_company: profile.targetCompany,
-        preferred_language: profile.preferredLanguage,
-        experience_level: profile.experienceLevel,
-        preferences: profile.preferences,
         updated_at: new Date().toISOString(),
-      });
-      return !error;
-    } catch {
-      return false;
+      };
+      if (profile.fullName !== undefined) payload.full_name = profile.fullName;
+      if (profile.university !== undefined) payload.university = profile.university;
+      if (profile.targetRole !== undefined) payload.target_role = profile.targetRole;
+      if (profile.targetCompany !== undefined) payload.target_company = profile.targetCompany;
+      if (profile.preferredLanguage !== undefined) payload.preferred_language = profile.preferredLanguage;
+      if (profile.experienceLevel !== undefined) payload.experience_level = profile.experienceLevel;
+      if (profile.preferences !== undefined) payload.preferences = profile.preferences;
+
+      const { error } = await supabase.from('profiles').upsert(payload);
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update profile';
+      return { success: false, error: msg };
     }
   },
 
@@ -74,8 +90,8 @@ export const progressService = {
   /**
    * Toggle a milestone
    */
-  async toggleMilestone(userId: string, milestoneId: string, completed: boolean): Promise<boolean> {
-    if (!isSupabaseConfigured || !userId) return false;
+  async toggleMilestone(userId: string, milestoneId: string, completed: boolean): Promise<{ success: boolean; error?: string }> {
+    if (!isSupabaseConfigured || !userId) return { success: true };
     try {
       if (completed) {
         const { error } = await supabase.from('user_progress').upsert(
@@ -88,17 +104,20 @@ export const progressService = {
           },
           { onConflict: 'user_id,milestone_id' }
         );
-        return !error;
+        if (error) return { success: false, error: error.message };
+        return { success: true };
       } else {
         const { error } = await supabase
           .from('user_progress')
           .delete()
           .eq('user_id', userId)
           .eq('milestone_id', milestoneId);
-        return !error;
+        if (error) return { success: false, error: error.message };
+        return { success: true };
       }
-    } catch {
-      return false;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update milestone';
+      return { success: false, error: msg };
     }
   },
 
@@ -129,8 +148,12 @@ export const progressService = {
   /**
    * Update single question status
    */
-  async updateQuestionStatus(userId: string, questionId: number, status: QuestionStatus): Promise<boolean> {
-    if (!isSupabaseConfigured || !userId) return false;
+  async updateQuestionStatus(
+    userId: string,
+    questionId: number,
+    status: QuestionStatus
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!isSupabaseConfigured || !userId) return { success: true };
     try {
       if (status === 'Not started') {
         const { error } = await supabase
@@ -138,7 +161,8 @@ export const progressService = {
           .delete()
           .eq('user_id', userId)
           .eq('question_id', questionId);
-        return !error;
+        if (error) return { success: false, error: error.message };
+        return { success: true };
       } else {
         const { error } = await supabase.from('dsa_progress').upsert(
           {
@@ -150,10 +174,12 @@ export const progressService = {
           },
           { onConflict: 'user_id,question_id' }
         );
-        return !error;
+        if (error) return { success: false, error: error.message };
+        return { success: true };
       }
-    } catch {
-      return false;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update problem status';
+      return { success: false, error: msg };
     }
   },
 
@@ -190,8 +216,13 @@ export const progressService = {
   /**
    * Toggle bookmark
    */
-  async toggleBookmark(userId: string, itemId: string, itemType: 'question' | 'resource', add: boolean): Promise<boolean> {
-    if (!isSupabaseConfigured || !userId) return false;
+  async toggleBookmark(
+    userId: string,
+    itemId: string,
+    itemType: 'question' | 'resource',
+    add: boolean
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!isSupabaseConfigured || !userId) return { success: true };
     try {
       if (add) {
         const { error } = await supabase.from('user_bookmarks').upsert(
@@ -203,7 +234,8 @@ export const progressService = {
           },
           { onConflict: 'user_id,item_id,item_type' }
         );
-        return !error;
+        if (error) return { success: false, error: error.message };
+        return { success: true };
       } else {
         const { error } = await supabase
           .from('user_bookmarks')
@@ -211,84 +243,196 @@ export const progressService = {
           .eq('user_id', userId)
           .eq('item_id', itemId)
           .eq('item_type', itemType);
-        return !error;
+        if (error) return { success: false, error: error.message };
+        return { success: true };
       }
-    } catch {
-      return false;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update bookmark';
+      return { success: false, error: msg };
     }
   },
 
   /**
-   * Safe, Idempotent Data Migration:
-   * Migrates local/guest state to normalized tables when user signs in.
+   * Robust Synchronization & Migration Flow:
+   * 1. Detect authenticated user.
+   * 2. Load remote database data first (Source of Truth).
+   * 3. Inspect genuine guest data (if any).
+   * 4. Perform non-destructive union merge.
+   * 5. Migrate only valid guest changes to remote.
+   * 6. Update user-scoped local cache.
+   * 7. Clear guest state to prevent double-migration.
    */
-  async migrateGuestDataToUser(userId: string, localState: WorkspaceState): Promise<void> {
-    if (!isSupabaseConfigured || !userId || !localState) return;
+  async synchronizeUserData(userId: string): Promise<SyncResult> {
+    if (!userId) {
+      const guest = storageService.loadState();
+      return { state: guest, syncedWithCloud: false, migratedGuestData: false };
+    }
+
+    // If Supabase is not configured, fall back directly to user-scoped local storage
+    if (!isSupabaseConfigured) {
+      const cached = storageService.loadState(userId);
+      return { state: cached, syncedWithCloud: false, migratedGuestData: false };
+    }
 
     try {
-      // 1. Migrate profile if target company/role provided and not placeholder
-      if (localState.profile?.targetRole || localState.profile?.company) {
-        await supabase.from('profiles').upsert({
-          id: userId,
-          full_name: localState.profile.fullName || undefined,
-          university: localState.profile.university || undefined,
-          target_role: localState.profile.targetRole || 'Software Engineer',
-          target_company: localState.profile.company || 'Meta',
-          preferred_language: localState.profile.preferredLanguage || 'Python',
-          experience_level: localState.profile.experienceLevel || 'Beginner / Student',
-          updated_at: new Date().toISOString(),
-        });
-      }
+      // Step 1: Load remote data FIRST
+      const [remoteProfile, remoteMilestones, remoteDSA, remoteBookmarks] = await Promise.all([
+        this.getProfile(userId),
+        this.getMilestones(userId),
+        this.getDSAProgress(userId),
+        this.getBookmarks(userId),
+      ]);
 
-      // 2. Migrate milestones
-      if (localState.completedMilestones && localState.completedMilestones.length > 0) {
-        const milestoneRows = localState.completedMilestones.map((milestoneId) => ({
-          user_id: userId,
-          milestone_id: milestoneId,
-          completed: true,
-          completed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }));
-        await supabase.from('user_progress').upsert(milestoneRows, { onConflict: 'user_id,milestone_id' });
-      }
+      // Step 2: Check for genuine guest data in local storage
+      const guestState = storageService.getGuestState();
+      const hasGenuineGuest = isGenuineGuestData(guestState);
+      let didMigrateGuest = false;
 
-      // 3. Migrate solved & attempted DSA questions
-      const dsaRows: Array<{ user_id: string; question_id: number; status: 'Solved' | 'Attempted'; updated_at: string }> = [];
-      localState.solved?.forEach((qId) => {
-        dsaRows.push({ user_id: userId, question_id: qId, status: 'Solved', updated_at: new Date().toISOString() });
-      });
-      localState.attempted?.forEach((qId) => {
-        if (!localState.solved?.includes(qId)) {
-          dsaRows.push({ user_id: userId, question_id: qId, status: 'Attempted', updated_at: new Date().toISOString() });
+      // Step 3: Perform union-based conflict resolution
+      let finalSolved = remoteDSA.solved;
+      let finalAttempted = remoteDSA.attempted;
+      let finalMilestones = remoteMilestones;
+      let finalQuestionBookmarks = remoteBookmarks.questionBookmarks;
+      let finalResourceBookmarks = remoteBookmarks.resourceBookmarks;
+
+      // If genuine guest activity exists, merge it into remote data
+      if (hasGenuineGuest && guestState) {
+        // A. Solved questions: Union
+        const newSolvedFromGuest = guestState.solved.filter((q) => !remoteDSA.solved.includes(q));
+        if (newSolvedFromGuest.length > 0) {
+          const insertRows = newSolvedFromGuest.map((qId) => ({
+            user_id: userId,
+            question_id: qId,
+            status: 'Solved' as const,
+            last_attempted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }));
+          await supabase.from('dsa_progress').upsert(insertRows, { onConflict: 'user_id,question_id' });
+          finalSolved = Array.from(new Set([...finalSolved, ...newSolvedFromGuest]));
         }
-      });
-      if (dsaRows.length > 0) {
-        await supabase.from('dsa_progress').upsert(dsaRows, { onConflict: 'user_id,question_id' });
+
+        // B. Attempted questions: Union (excluding solved)
+        const newAttemptedFromGuest = guestState.attempted.filter(
+          (q) => !remoteDSA.attempted.includes(q) && !finalSolved.includes(q)
+        );
+        if (newAttemptedFromGuest.length > 0) {
+          const insertRows = newAttemptedFromGuest.map((qId) => ({
+            user_id: userId,
+            question_id: qId,
+            status: 'Attempted' as const,
+            last_attempted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }));
+          await supabase.from('dsa_progress').upsert(insertRows, { onConflict: 'user_id,question_id' });
+          finalAttempted = Array.from(new Set([...finalAttempted, ...newAttemptedFromGuest]));
+        }
+
+        // C. Milestones: Union
+        const newMilestonesFromGuest = guestState.completedMilestones.filter(
+          (m) => !remoteMilestones.includes(m)
+        );
+        if (newMilestonesFromGuest.length > 0) {
+          const milestoneRows = newMilestonesFromGuest.map((m) => ({
+            user_id: userId,
+            milestone_id: m,
+            completed: true,
+            completed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }));
+          await supabase.from('user_progress').upsert(milestoneRows, { onConflict: 'user_id,milestone_id' });
+          finalMilestones = Array.from(new Set([...finalMilestones, ...newMilestonesFromGuest]));
+        }
+
+        // D. Question Bookmarks: Union
+        const newQBFromGuest = guestState.bookmarks.filter(
+          (b) => !remoteBookmarks.questionBookmarks.includes(b)
+        );
+        if (newQBFromGuest.length > 0) {
+          const qbRows = newQBFromGuest.map((b) => ({
+            user_id: userId,
+            item_id: String(b),
+            item_type: 'question' as const,
+            created_at: new Date().toISOString(),
+          }));
+          await supabase.from('user_bookmarks').upsert(qbRows, { onConflict: 'user_id,item_id,item_type' });
+          finalQuestionBookmarks = Array.from(new Set([...finalQuestionBookmarks, ...newQBFromGuest]));
+        }
+
+        // E. Resource Bookmarks: Union
+        const newRBFromGuest = guestState.resourceBookmarks.filter(
+          (b) => !remoteBookmarks.resourceBookmarks.includes(b)
+        );
+        if (newRBFromGuest.length > 0) {
+          const rbRows = newRBFromGuest.map((b) => ({
+            user_id: userId,
+            item_id: b,
+            item_type: 'resource' as const,
+            created_at: new Date().toISOString(),
+          }));
+          await supabase.from('user_bookmarks').upsert(rbRows, { onConflict: 'user_id,item_id,item_type' });
+          finalResourceBookmarks = Array.from(new Set([...finalResourceBookmarks, ...newRBFromGuest]));
+        }
+
+        // F. Profile merge: if remote profile is missing info and guest provided it, save to remote
+        if (!remoteProfile?.targetRole && guestState.profile?.targetRole) {
+          await this.updateProfile(userId, {
+            targetRole: guestState.profile.targetRole,
+            targetCompany: guestState.profile.company,
+            preferredLanguage: guestState.profile.preferredLanguage,
+            experienceLevel: guestState.profile.experienceLevel,
+          });
+        }
+
+        // Clear guest state now that it has been safely migrated
+        storageService.clearGuestState();
+        didMigrateGuest = true;
       }
 
-      // 4. Migrate bookmarks
-      const bookmarkRows: Array<{ user_id: string; item_id: string; item_type: 'question' | 'resource'; created_at: string }> = [];
-      localState.bookmarks?.forEach((qId) => {
-        bookmarkRows.push({ user_id: userId, item_id: String(qId), item_type: 'question', created_at: new Date().toISOString() });
-      });
-      localState.resourceBookmarks?.forEach((rId) => {
-        bookmarkRows.push({ user_id: userId, item_id: rId, item_type: 'resource', created_at: new Date().toISOString() });
-      });
-      if (bookmarkRows.length > 0) {
-        await supabase.from('user_bookmarks').upsert(bookmarkRows, { onConflict: 'user_id,item_id,item_type' });
-      }
+      // Step 4: Assemble finalized state
+      // If user has existing local cache for this user ID, merge any custom resources
+      const existingUserLocal = storageService.loadState(userId);
 
-      // 5. Backwards compatibility: keep mangos_workspace_state updated for the user
-      await supabase.from('mangos_workspace_state').upsert(
-        {
-          learner_key: userId,
-          state: localState,
-          updated_at: new Date().toISOString(),
+      const mergedState: WorkspaceState = {
+        solved: finalSolved,
+        attempted: finalAttempted,
+        bookmarks: finalQuestionBookmarks,
+        resourceBookmarks: finalResourceBookmarks,
+        completedMilestones: finalMilestones,
+        customResources:
+          existingUserLocal.customResources.length > 0
+            ? existingUserLocal.customResources
+            : INITIAL_RESOURCES,
+        streak: finalSolved.length > 0 ? Math.max(1, existingUserLocal.streak) : 0,
+        profile: {
+          fullName: remoteProfile?.fullName || existingUserLocal.profile?.fullName || '',
+          university: remoteProfile?.university || existingUserLocal.profile?.university || '',
+          targetRole: remoteProfile?.targetRole || existingUserLocal.profile?.targetRole || '',
+          company: remoteProfile?.targetCompany || existingUserLocal.profile?.company || 'Meta',
+          preferredLanguage: remoteProfile?.preferredLanguage || existingUserLocal.profile?.preferredLanguage || 'Python',
+          experienceLevel: remoteProfile?.experienceLevel || existingUserLocal.profile?.experienceLevel || 'Beginner / Student',
+          role: remoteProfile?.role || 'student',
         },
-        { onConflict: 'learner_key' }
-      );
-    } catch (err) {
-      console.warn('Idempotent migration notice:', err);
+      };
+
+      // Step 5: Persist to user-scoped localStorage
+      storageService.saveUserState(userId, mergedState);
+
+      return {
+        state: mergedState,
+        syncedWithCloud: true,
+        migratedGuestData: didMigrateGuest,
+      };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Database sync failed';
+      console.warn('Sync notice:', msg);
+      // Fallback to local user cache
+      const cached = storageService.loadState(userId);
+      return {
+        state: cached,
+        syncedWithCloud: false,
+        migratedGuestData: false,
+        error: msg,
+      };
     }
   },
 };

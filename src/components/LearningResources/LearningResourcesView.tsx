@@ -18,6 +18,7 @@ import { ResourceFilters, SortOption } from './ResourceFilters';
 import { ResourceImportModal } from './ResourceImportModal';
 import { ResourceFormModal } from './ResourceFormModal';
 import { isNewResource, exportResourcesToJson } from '../../utils/resourceUtils';
+import { resourceService } from '../../services/resourceService';
 
 interface LearningResourcesViewProps {
   resources: LearningResource[];
@@ -25,6 +26,7 @@ interface LearningResourcesViewProps {
   bookmarkedIds: string[];
   toggleBookmark: (id: string) => void;
   notify: (message: string) => void;
+  isAdmin?: boolean;
 }
 
 export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
@@ -33,6 +35,7 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
   bookmarkedIds,
   toggleBookmark,
   notify,
+  isAdmin = false,
 }) => {
   // Filters State
   const [search, setSearch] = useState('');
@@ -134,12 +137,17 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
   };
 
   // Actions
-  const handleBatchImport = (newItems: LearningResource[]) => {
+  const handleBatchImport = async (newItems: LearningResource[]) => {
     setResources((prev) => [...newItems, ...prev]);
-    notify(`Successfully imported ${newItems.length} new verified resources!`);
+    const res = await resourceService.batchSaveResources(newItems, isAdmin);
+    if (res.isCloudSynced) {
+      notify(`Successfully published ${newItems.length} verified resources to global library!`);
+    } else {
+      notify(`Imported ${newItems.length} verified resources to your workspace library.`);
+    }
   };
 
-  const handleSaveResource = (saved: LearningResource) => {
+  const handleSaveResource = async (saved: LearningResource) => {
     setResources((prev) => {
       const exists = prev.some((r) => r.id === saved.id);
       if (exists) {
@@ -147,12 +155,23 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
       }
       return [saved, ...prev];
     });
-    notify(editingResource ? 'Resource updated successfully' : 'New resource added to library');
+    const res = await resourceService.saveResource(saved, isAdmin);
+    if (!res.success) {
+      notify(`Saved locally. ${res.error || 'Cloud sync restricted to admins'}`);
+    } else if (res.isCloudSynced) {
+      notify('Resource published to the global curated library!');
+    } else {
+      notify(editingResource ? 'Resource updated in personal library' : 'New resource added to personal library');
+    }
     setEditingResource(null);
   };
 
-  const handleUpdateStatus = (id: string, status: LearningResource['status']) => {
+  const handleUpdateStatus = async (id: string, status: LearningResource['status']) => {
     setResources((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+    const item = resources.find((r) => r.id === id);
+    if (item && isAdmin) {
+      await resourceService.saveResource({ ...item, status }, true);
+    }
     notify(`Resource status updated to ${status}`);
   };
 
@@ -297,7 +316,7 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
                   setShowFormModal(true);
                 }}
                 onUpdateStatus={handleUpdateStatus}
-                isAdmin
+                isAdmin={isAdmin}
               />
             ))}
           </div>
@@ -353,7 +372,7 @@ export const LearningResourcesView: React.FC<LearningResourcesViewProps> = ({
                   setShowFormModal(true);
                 }}
                 onUpdateStatus={handleUpdateStatus}
-                isAdmin
+                isAdmin={isAdmin}
               />
             ))}
           </div>

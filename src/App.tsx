@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import type { SetStateAction } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Sidebar, Page } from './components/Sidebar';
-import { Topbar } from './components/layout/Topbar';
+import { Topbar, SyncStatus } from './components/layout/Topbar';
 import { Dashboard } from './pages/Dashboard';
 import { DSA } from './pages/DSA';
 import { Companies } from './pages/Companies';
@@ -15,42 +15,23 @@ import { Profile } from './pages/Profile';
 import { LearningResourcesView } from './components/LearningResources/LearningResourcesView';
 import { AuthModal } from './components/auth/AuthModal';
 import { OnboardingModal } from './components/auth/OnboardingModal';
-import { INITIAL_RESOURCES } from './data/initialResources';
 import { useAuth } from './hooks/useAuth';
 import { useTheme } from './hooks/useTheme';
 import { progressService } from './services/progressService';
 import { resourceService } from './services/resourceService';
+import { storageService, createNeutralState } from './services/storageService';
 import type { WorkspaceState, QuestionStatus, UserProfile } from './types/user';
 import type { LearningResource } from './types/resources';
 
-const defaultState: WorkspaceState = {
-  solved: [1],
-  attempted: [2],
-  bookmarks: [2, 5],
-  resourceBookmarks: ['res-freecodecamp', 'res-cs50', 'res-system-design-primer'],
-  customResources: INITIAL_RESOURCES,
-  completedMilestones: ['Programming fundamentals'],
-  streak: 12,
-  profile: {
-    fullName: 'Jordan Davis',
-    university: 'University of Michigan',
-    school: 'University of Michigan',
-    targetRole: 'Software Engineer',
-    role: 'Software Engineer',
-    company: 'Meta',
-    preferredLanguage: 'Python',
-    experienceLevel: 'Beginner / Student',
-  },
-};
-
 export function App() {
   const [page, setPage] = useState<Page>('Dashboard');
-  const [state, setState] = useState<WorkspaceState>(defaultState);
+  const [state, setState] = useState<WorkspaceState>(createNeutralState);
   const [hydrated, setHydrated] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toast, setToast] = useState('');
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('offline');
 
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
@@ -59,100 +40,81 @@ export function App() {
 
   const notify = useCallback((message: string) => {
     setToast(message);
-    window.setTimeout(() => setToast(''), 2600);
+    window.setTimeout(() => setToast(''), 2800);
   }, []);
 
-  // 1. Initial State Hydration (LocalStorage + Supabase)
+  // 1. Initial State Hydration (Safe Migration + User-Scoped Storage)
   useEffect(() => {
     const hydrateState = async () => {
-      let workingState = defaultState;
-      const local = localStorage.getItem('mangos-workspace-state');
-      if (local) {
-        try {
-          const parsed = JSON.parse(local) as Partial<WorkspaceState>;
-          workingState = {
-            ...defaultState,
-            ...parsed,
-            profile: {
-              ...defaultState.profile,
-              ...(parsed.profile || {}),
-            },
-            customResources: parsed.customResources && parsed.customResources.length > 0
-              ? parsed.customResources
-              : INITIAL_RESOURCES,
-            resourceBookmarks: parsed.resourceBookmarks || defaultState.resourceBookmarks,
-          };
-        } catch {
-          workingState = defaultState;
-        }
-      }
+      // Migrate legacy shared localStorage key and eliminate any demo contamination
+      storageService.migrateLegacyStorage();
 
-      // Also check if custom learning resources were saved in service cache
+      // Load user or guest state from isolated storage
+      const initial = user ? storageService.loadState(user.id) : storageService.loadState(null);
+
+      // Also hydrate learning resources from service cache
       const cachedResources = resourceService.getLocalResources();
       if (cachedResources && cachedResources.length > 0) {
-        workingState.customResources = cachedResources;
+        initial.customResources = cachedResources;
       }
 
-      setState(workingState);
+      setState(initial);
+      setSyncStatus(user ? 'syncing' : 'offline');
       setHydrated(true);
     };
 
     void hydrateState();
-  }, []);
+  }, [user]);
 
-  // 2. User Authentication Sync & Data Migration
-  useEffect(() => {
-    if (!hydrated || !user) return;
+  // 2. Synchronization with Cloud Database
+  const triggerSync = useCallback(async (userId: string) => {
+    setSyncStatus('syncing');
+    const result = await progressService.synchronizeUserData(userId);
 
-    const syncUserData = async () => {
-      // Safe, idempotent migration of any existing local state into normalized database tables
-      await progressService.migrateGuestDataToUser(user.id, stateRef.current);
+    setState(result.state);
 
-      // Load user profile from Supabase
-      const remoteProfile = await progressService.getProfile(user.id);
-      const remoteMilestones = await progressService.getMilestones(user.id);
-      const remoteDSA = await progressService.getDSAProgress(user.id);
-      const remoteBookmarks = await progressService.getBookmarks(user.id);
+    if (result.syncedWithCloud) {
+      setSyncStatus('synced');
+    } else {
+      setSyncStatus(result.error ? 'error' : 'offline');
+    }
 
-      setState((prev) => {
-        const updatedProfile = remoteProfile
-          ? {
-              ...prev.profile,
-              fullName: remoteProfile.fullName || prev.profile?.fullName,
-              university: remoteProfile.university || prev.profile?.university,
-              targetRole: remoteProfile.targetRole || prev.profile?.targetRole,
-              company: remoteProfile.targetCompany || prev.profile?.company,
-              preferredLanguage: remoteProfile.preferredLanguage || prev.profile?.preferredLanguage,
-              experienceLevel: remoteProfile.experienceLevel || prev.profile?.experienceLevel,
-            }
-          : prev.profile;
+    if (result.migratedGuestData) {
+      notify('Guest progress successfully saved to your cloud account!');
+    } else if (result.error) {
+      notify('Could not sync with cloud. Changes saved in local storage.');
+    }
 
-        return {
-          ...prev,
-          profile: updatedProfile,
-          completedMilestones: remoteMilestones.length > 0 ? remoteMilestones : prev.completedMilestones,
-          solved: remoteDSA.solved.length > 0 ? remoteDSA.solved : prev.solved,
-          attempted: remoteDSA.attempted.length > 0 ? remoteDSA.attempted : prev.attempted,
-          bookmarks: remoteBookmarks.questionBookmarks.length > 0 ? remoteBookmarks.questionBookmarks : prev.bookmarks,
-          resourceBookmarks: remoteBookmarks.resourceBookmarks.length > 0 ? remoteBookmarks.resourceBookmarks : prev.resourceBookmarks,
-        };
-      });
+    // Check if user needs onboarding
+    if (!result.state.profile.targetRole || !result.state.profile.fullName) {
+      setOnboardingOpen(true);
+    }
+  }, [notify]);
 
-      // Prompt onboarding if profile is fresh or missing target role
-      if (!remoteProfile?.targetRole || !remoteProfile?.fullName) {
-        setOnboardingOpen(true);
-      }
-    };
-
-    void syncUserData();
-  }, [user, hydrated]);
-
-  // 3. LocalStorage persistence
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem('mangos-workspace-state', JSON.stringify(state));
+
+    if (user) {
+      void triggerSync(user.id);
+    } else {
+      // Switched to guest mode or logged out: safely reset to guest state
+      const guestState = storageService.loadState(null);
+      setState(guestState);
+      setSyncStatus('offline');
+    }
+  }, [user, hydrated, triggerSync]);
+
+  // 3. User-Scoped Local Storage Auto-Persistence
+  useEffect(() => {
+    if (!hydrated) return;
+
+    if (user) {
+      storageService.saveUserState(user.id, state);
+    } else {
+      storageService.saveGuestState(state);
+    }
     resourceService.setLocalResources(state.customResources);
-  }, [state, hydrated]);
+  }, [state, hydrated, user]);
 
   const navigate = (next: Page) => {
     setPage(next);
@@ -168,7 +130,13 @@ export function App() {
     notify(isBookmarked ? 'Question removed from bookmarks' : 'Question saved to bookmarks');
 
     if (user) {
-      await progressService.toggleBookmark(user.id, String(id), 'question', !isBookmarked);
+      const res = await progressService.toggleBookmark(user.id, String(id), 'question', !isBookmarked);
+      if (!res.success) {
+        setSyncStatus('error');
+        notify('Bookmark saved locally. Cloud sync pending.');
+      } else {
+        setSyncStatus('synced');
+      }
     }
   };
 
@@ -177,10 +145,17 @@ export function App() {
       ...curr,
       solved: status === 'Solved' ? [...new Set([...curr.solved, id])] : curr.solved.filter((item) => item !== id),
       attempted: status === 'Attempted' ? [...new Set([...curr.attempted, id])] : curr.attempted.filter((item) => item !== id),
+      streak: status === 'Solved' ? Math.max(1, curr.streak + 1) : curr.streak,
     }));
 
     if (user) {
-      await progressService.updateQuestionStatus(user.id, id, status);
+      const res = await progressService.updateQuestionStatus(user.id, id, status);
+      if (!res.success) {
+        setSyncStatus('error');
+        notify('Problem status saved locally. Cloud sync pending.');
+      } else {
+        setSyncStatus('synced');
+      }
     }
   };
 
@@ -195,7 +170,13 @@ export function App() {
     notify(isDone ? 'Milestone unmarked' : 'Milestone completed! Keep the momentum going.');
 
     if (user) {
-      await progressService.toggleMilestone(user.id, milestone, !isDone);
+      const res = await progressService.toggleMilestone(user.id, milestone, !isDone);
+      if (!res.success) {
+        setSyncStatus('error');
+        notify('Milestone saved locally. Cloud sync pending.');
+      } else {
+        setSyncStatus('synced');
+      }
     }
   };
 
@@ -210,7 +191,13 @@ export function App() {
     notify(isBookmarked ? 'Resource removed from bookmarks' : 'Resource saved to bookmarks');
 
     if (user) {
-      await progressService.toggleBookmark(user.id, id, 'resource', !isBookmarked);
+      const res = await progressService.toggleBookmark(user.id, id, 'resource', !isBookmarked);
+      if (!res.success) {
+        setSyncStatus('error');
+        notify('Bookmark saved locally. Cloud sync pending.');
+      } else {
+        setSyncStatus('synced');
+      }
     }
   };
 
@@ -233,7 +220,7 @@ export function App() {
     }));
 
     if (user) {
-      await progressService.updateProfile(user.id, {
+      const res = await progressService.updateProfile(user.id, {
         fullName: updated.fullName,
         university: updated.university,
         targetRole: updated.targetRole || updated.role,
@@ -241,6 +228,12 @@ export function App() {
         preferredLanguage: updated.preferredLanguage,
         experienceLevel: updated.experienceLevel,
       });
+      if (!res.success) {
+        setSyncStatus('error');
+        notify('Profile saved locally. Cloud sync pending.');
+      } else {
+        setSyncStatus('synced');
+      }
     }
   };
 
@@ -260,10 +253,12 @@ export function App() {
 
   const handleSignOut = async () => {
     await signOut();
+    setSyncStatus('offline');
     notify('Signed out successfully');
   };
 
   const userName = state.profile?.fullName || (user?.email ? user.email.split('@')[0] : 'Learner');
+  const isAdmin = state.profile?.role === 'admin';
 
   return (
     <div data-theme={theme} className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-main)] flex">
@@ -289,6 +284,8 @@ export function App() {
           onToggleTheme={toggleTheme}
           currentUser={user}
           userName={userName}
+          syncStatus={syncStatus}
+          onRetrySync={() => user && void triggerSync(user.id)}
           onOpenAuth={() => setAuthModalOpen(true)}
           onNavigateProfile={() => navigate('Profile')}
         />
@@ -310,6 +307,7 @@ export function App() {
               bookmarkedIds={state.resourceBookmarks}
               toggleBookmark={toggleResourceBookmark}
               notify={notify}
+              isAdmin={isAdmin}
             />
           )}
           {page === 'Companies' && <Companies navigate={navigate} notify={notify} />}

@@ -2,6 +2,14 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { LearningResource } from '../types/resources';
 import { INITIAL_RESOURCES } from '../data/initialResources';
 
+const LOCAL_RESOURCES_KEY = 'mangos_learning_resources_catalog';
+
+export interface ResourceOperationResult {
+  success: boolean;
+  error?: string;
+  isCloudSynced?: boolean;
+}
+
 export const resourceService = {
   /**
    * Fetch all learning resources from Supabase with fallback to INITIAL_RESOURCES + localStorage
@@ -20,7 +28,7 @@ export const resourceService = {
         return this.getLocalResources();
       }
 
-      return data.map((row) => ({
+      const remoteList: LearningResource[] = data.map((row) => ({
         id: row.id,
         name: row.name,
         description: row.description,
@@ -37,41 +45,55 @@ export const resourceService = {
         learning_path: row.learning_path,
         is_featured: row.is_featured,
       }));
+
+      // Cache locally for offline resilience
+      this.setLocalResources(remoteList);
+      return remoteList;
     } catch {
       return this.getLocalResources();
     }
   },
 
   getLocalResources(): LearningResource[] {
-    const saved = localStorage.getItem('mangos_learning_resources');
+    const saved = localStorage.getItem(LOCAL_RESOURCES_KEY);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch {
-        // use initial
+        // fallback
       }
     }
     return INITIAL_RESOURCES;
   },
 
   setLocalResources(resources: LearningResource[]): void {
-    localStorage.setItem('mangos_learning_resources', JSON.stringify(resources));
+    try {
+      localStorage.setItem(LOCAL_RESOURCES_KEY, JSON.stringify(resources));
+    } catch (err) {
+      console.warn('Failed to cache resources locally:', err);
+    }
   },
 
   /**
-   * Upsert single resource
+   * Upsert single resource.
+   * If caller is admin and Supabase is configured, saves to shared cloud catalogue.
+   * Otherwise saves to local catalog only.
    */
-  async saveResource(resource: LearningResource): Promise<boolean> {
-    if (!isSupabaseConfigured) {
-      const list = this.getLocalResources();
-      const idx = list.findIndex((r) => r.id === resource.id);
-      if (idx >= 0) list[idx] = resource;
-      else list.unshift(resource);
-      this.setLocalResources(list);
-      return true;
+  async saveResource(resource: LearningResource, isAdmin: boolean = false): Promise<ResourceOperationResult> {
+    // 1. Always update local cache
+    const list = this.getLocalResources();
+    const idx = list.findIndex((r) => r.id === resource.id);
+    if (idx >= 0) list[idx] = resource;
+    else list.unshift(resource);
+    this.setLocalResources(list);
+
+    // 2. If not admin or not configured, return as local save
+    if (!isSupabaseConfigured || !isAdmin) {
+      return { success: true, isCloudSynced: false };
     }
 
+    // 3. Save to remote Supabase catalogue as admin
     try {
       const { error } = await supabase.from('learning_resources').upsert({
         id: resource.id,
@@ -91,16 +113,52 @@ export const resourceService = {
         is_featured: resource.is_featured,
         updated_at: new Date().toISOString(),
       });
-      return !error;
-    } catch {
-      return false;
+
+      if (error) {
+        return { success: false, error: error.message, isCloudSynced: false };
+      }
+      return { success: true, isCloudSynced: true };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Database error';
+      return { success: false, error: msg, isCloudSynced: false };
     }
   },
 
   /**
-   * Batch upsert resources
+   * Delete single resource
    */
-  async batchSaveResources(resources: LearningResource[]): Promise<boolean> {
+  async deleteResource(resourceId: string, isAdmin: boolean = false): Promise<ResourceOperationResult> {
+    // Remove from local cache
+    const list = this.getLocalResources().filter((r) => r.id !== resourceId);
+    this.setLocalResources(list);
+
+    if (!isSupabaseConfigured || !isAdmin) {
+      return { success: true, isCloudSynced: false };
+    }
+
+    try {
+      const { error } = await supabase
+        .from('learning_resources')
+        .delete()
+        .eq('id', resourceId);
+
+      if (error) {
+        return { success: false, error: error.message, isCloudSynced: false };
+      }
+      return { success: true, isCloudSynced: true };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete resource';
+      return { success: false, error: msg, isCloudSynced: false };
+    }
+  },
+
+  /**
+   * Batch upsert resources (e.g. JSON import)
+   */
+  async batchSaveResources(
+    resources: LearningResource[],
+    isAdmin: boolean = false
+  ): Promise<ResourceOperationResult> {
     const list = this.getLocalResources();
     const map = new Map<string, LearningResource>();
     list.forEach((r) => map.set(r.id, r));
@@ -108,7 +166,9 @@ export const resourceService = {
     const merged = Array.from(map.values());
     this.setLocalResources(merged);
 
-    if (!isSupabaseConfigured) return true;
+    if (!isSupabaseConfigured || !isAdmin) {
+      return { success: true, isCloudSynced: false };
+    }
 
     try {
       const rows = resources.map((r) => ({
@@ -131,9 +191,13 @@ export const resourceService = {
       }));
 
       const { error } = await supabase.from('learning_resources').upsert(rows);
-      return !error;
-    } catch {
-      return false;
+      if (error) {
+        return { success: false, error: error.message, isCloudSynced: false };
+      }
+      return { success: true, isCloudSynced: true };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Batch save failed';
+      return { success: false, error: msg, isCloudSynced: false };
     }
   },
 };

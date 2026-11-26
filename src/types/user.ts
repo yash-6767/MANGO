@@ -21,6 +21,7 @@ export interface UserProfile {
   targetCompany: CompanyName;
   preferredLanguage: string;
   experienceLevel: string;
+  role?: 'student' | 'mentor' | 'admin';
   preferences?: Record<string, unknown>;
 }
 
@@ -34,7 +35,7 @@ export interface WorkspaceState {
   streak: number;
   profile: {
     fullName?: string;
-    role?: string;
+    role?: 'student' | 'mentor' | 'admin' | string;
     targetRole?: string;
     company: CompanyName;
     school?: string;

@@ -23,9 +23,9 @@ export const Profile: React.FC<ProfileProps> = ({
   onSignOut,
   notify,
 }) => {
-  const [fullName, setFullName] = useState(state.profile?.fullName || 'Jordan Davis');
-  const [university, setUniversity] = useState(state.profile?.university || state.profile?.school || 'University of Michigan');
-  const [targetRole, setTargetRole] = useState(state.profile?.targetRole || state.profile?.role || 'Software Engineering');
+  const [fullName, setFullName] = useState(state.profile?.fullName || '');
+  const [university, setUniversity] = useState(state.profile?.university || state.profile?.school || '');
+  const [targetRole, setTargetRole] = useState(state.profile?.targetRole || state.profile?.role || 'Software Engineer');
   const [company, setCompany] = useState<CompanyName>(state.profile?.company || 'Meta');
   const [preferredLanguage, setPreferredLanguage] = useState(state.profile?.preferredLanguage || 'Python');
   const [experienceLevel, setExperienceLevel] = useState(state.profile?.experienceLevel || 'Beginner / Student');
@@ -51,7 +51,7 @@ export const Profile: React.FC<ProfileProps> = ({
     .filter(Boolean)
     .join('')
     .substring(0, 2)
-    .toUpperCase() || 'JD';
+    .toUpperCase() || (currentUser?.email ? currentUser.email.substring(0, 2).toUpperCase() : 'G');
 
   return (
     <div>
