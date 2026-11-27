@@ -466,6 +466,13 @@ MANGOS is optimized for deployment on modern static hosting platforms such as Ve
    - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
 6. Click **Deploy**.
 
+### Deployment Pipeline Verification
+
+- **Deployment platform**: Vercel
+- **Production branch**: `main`
+- **Deployment trigger**: GitHub push
+- **Verification**: Automatic production deployment
+
 ---
 
 ## Product Roadmap
