@@ -461,10 +461,20 @@ MANGOS is optimized for deployment on modern static hosting platforms such as Ve
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
    - **Install Command**: `npm install`
-5. Under **Environment Variables**, add:
-   - `VITE_SUPABASE_URL`: Your Supabase project URL
-   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+5. Under **Environment Variables**, add the following before clicking Deploy:
+
+   | Variable | Required | Where to find it |
+   |---|---|---|
+   | `VITE_SUPABASE_URL` | ✅ Yes | Supabase Dashboard → Project Settings → API → **Project URL** |
+   | `VITE_SUPABASE_ANON_KEY` | ✅ Yes | Supabase Dashboard → Project Settings → API → **anon public** key |
+
+   > **Important:** Vite only exposes variables prefixed with `VITE_` to the browser bundle at build time. Without these two variables the app will launch in Guest Mode (local-only storage) and the Sign In / Sign Up modal will show a warning banner.  
+   > ⚠️  Never add your Supabase **service_role** key — only the **anon/public** key is safe for client-side use.
+
 6. Click **Deploy**.
+
+**Updating environment variables after first deploy:**  
+If you forgot to add the variables before deploying, go to **Vercel Dashboard → Project → Settings → Environment Variables**, add both keys for *Production*, *Preview*, and *Development*, then trigger a fresh **Redeploy** (Deployments tab → `⋯` → Redeploy) so the build picks up the new values.
 
 ### Deployment Pipeline Verification
 

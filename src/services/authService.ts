@@ -7,10 +7,12 @@ export interface AuthResponse {
   error: Error | null;
 }
 
+const NOT_CONFIGURED_ERROR = 'Supabase is not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your deployment environment variables to enable authentication.';
+
 export const authService = {
   async signUp(email: string, password: string, fullName?: string): Promise<AuthResponse> {
     if (!isSupabaseConfigured) {
-      return { user: null, session: null, error: new Error('Supabase is not configured.') };
+      return { user: null, session: null, error: new Error(NOT_CONFIGURED_ERROR) };
     }
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -26,7 +28,7 @@ export const authService = {
 
   async signIn(email: string, password: string): Promise<AuthResponse> {
     if (!isSupabaseConfigured) {
-      return { user: null, session: null, error: new Error('Supabase is not configured.') };
+      return { user: null, session: null, error: new Error(NOT_CONFIGURED_ERROR) };
     }
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -45,7 +47,7 @@ export const authService = {
 
   async resetPassword(email: string): Promise<{ error: Error | null }> {
     if (!isSupabaseConfigured) {
-      return { error: new Error('Supabase is not configured.') };
+      return { error: new Error(NOT_CONFIGURED_ERROR) };
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin,

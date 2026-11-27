@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Lock, Mail, User as UserIcon, Loader2, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, Lock, Mail, User as UserIcon, Loader2, Sparkles, CheckCircle2, AlertCircle, ShieldAlert } from 'lucide-react';
 import { authService } from '../../services/authService';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -111,6 +112,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {mode === 'forgot' && 'Enter your email to receive recovery instructions.'}
           </p>
         </div>
+
+        {/* Supabase Unconfigured Notice */}
+        {!isSupabaseConfigured && (
+          <div className="mb-5 rounded-xl border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] p-3.5 flex items-start gap-3">
+            <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5 text-[var(--status-warning)]" />
+            <div>
+              <p className="text-xs font-bold text-[var(--status-warning)]">Authentication not available</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-[var(--status-warning)]">
+                Supabase environment variables are not configured. The app is running in <strong>Guest Mode</strong> — your progress is saved locally.
+                To enable cloud sync and authentication, add{' '}
+                <code className="font-mono bg-[var(--bg-muted)] px-1 rounded">VITE_SUPABASE_URL</code> and{' '}
+                <code className="font-mono bg-[var(--bg-muted)] px-1 rounded">VITE_SUPABASE_ANON_KEY</code>{' '}
+                to your Vercel environment variables.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Tab switchers */}
         {mode !== 'forgot' && (
@@ -232,7 +250,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !isSupabaseConfigured}
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--emerald-primary)] px-4 py-3 text-sm font-bold text-white transition hover:bg-[var(--emerald-deep)] disabled:opacity-40 shadow-sm mt-2"
           >
             {loading ? (
